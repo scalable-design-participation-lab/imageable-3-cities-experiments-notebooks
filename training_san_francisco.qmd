@@ -1,0 +1,641 @@
+---
+title: Model training — San Francisco
+author: Uriel Legaria
+jupyter: imageable
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+#### Define metrics calculation functions
+
+```{python}
+import numpy as np
+from sklearn.metrics import r2_score
+from pathlib import Path
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+from xgboost import XGBRegressor
+import joblib
+import matplotlib.pyplot as plt
+from imageable.visualization.data_visualization import plot_time_series
+from tqdm import tqdm
+from imageable._correction_ensembles.cluster_weighted_ensemble import ClusterWeightedEnsembleWrapper
+from imageable._correction_ensembles.model_factories import choose_model_for_cluster_xgb
+
+
+
+def compute_mse(ground_truths, predicted_values):
+
+    mse = 0
+    n_data = len(ground_truths)
+    for i in range(n_data):
+        y_truth = ground_truths[i]
+        y_predicted = predicted_values[i]
+        mse += ((y_truth - y_predicted)**2)/n_data
+
+    return mse
+
+def compute_rmse(ground_truths, predicted_values):
+    mse = compute_mse(ground_truths, predicted_values)
+
+    return np.sqrt(mse)
+
+
+def compute_mae(ground_truths, predicted_values):
+    mae = 0
+    n_data = len(ground_truths)
+    for i in range(n_data):
+        y_truth = ground_truths[i]
+        y_predicted = predicted_values[i]
+        mae += np.abs(y_truth - y_predicted)/n_data
+
+    return mae
+
+
+def obtain_model_metrics(preds, ground_truths):
+    mse = compute_mse(preds, ground_truths)
+    rmse = compute_rmse(preds, ground_truths)
+    mae = compute_mae(preds, ground_truths)
+    r2_val = r2_score(ground_truths, preds)
+
+    return {
+        "mse":mse,
+        "rmse":rmse,
+        "mae":mae,
+        "r2_val":r2_val
+    }
+```
+
+#### Opening the ground truth data
+```{python}
+PARENT_PATH = Path("/Users/legariapena.j/Documents/imageable-2026/imageable/data/sanfrancisco_data")
+
+#Ground truth data San Francisco
+GROUND_TRUTH_SANFRANCISCO_PATH = PARENT_PATH/"footprints"/"Building_Footprints_sample_10000.geojson"
+ground_truth_sanfrancisco = gpd.read_file(GROUND_TRUTH_SANFRANCISCO_PATH)
+
+ground_truth_sanfrancisco.head(5)
+```
+
+### Opening the footprint results
+
+The results were obtained by applying the Imageable library's pipeline to the San Francisco buildings sample.
+```{python}
+file_path = PARENT_PATH/"labelled_footprints"/"san_francisco_results.geojson"
+gdf_sanfrancisco = gpd.read_file(file_path)
+```
+
+### Expanding the materials
+The material column is currently a dictionary and has to be expanded so that each material receives its own column.
+
+```{python}
+import ast
+import json
+
+def expand_materials(gdf):
+    #This would be a list of dictionaries.
+    materials = list(gdf["material_percentages"])
+    materials = [ast.literal_eval(x) for x in materials]
+
+    ALL_MATERIALS = ["asphalt","concrete","metal","road_marking","fabric_leather","glass","plaster", "plastic","rubber","sand", "gravel","ceramic","cobblestone","brick","grass","wood","leaf","water","human_body","sky"]
+
+    BASE_STR = "material_pct_"
+    #These would be all the materials
+    keys = ALL_MATERIALS
+
+    for i in range(len(keys)):
+        material_name = keys[i]
+
+        column_name = BASE_STR+material_name
+        column_values = []
+        for m in materials:
+            #Case where the dictionary is empty
+            if(not m):
+                column_values.append(None)
+            #Case where there is a percentages option in m (need to check why this happens)
+            elif(material_name not in m and "percentages" in m and material_name in m["percentages"]):
+                column_values.append(m["percentages"][material_name])
+            #Case where the dictionary just has materials: percentage.
+            elif(material_name in m):
+                column_values.append(m[material_name])
+            else:
+                print(m)
+                print(material_name)
+
+        gdf[column_name] = column_values
+
+    return gdf
+
+#Expand the materials.
+gdf_sanfrancisco = expand_materials(gdf_sanfrancisco)
+
+gdf_sanfrancisco.head(5)
+```
+
+### Reducing the number of features
+We reduce the number of features to the those that are used to train the models.
+
+```{python}
+FOOTPRINT_FEATURES = [
+    "unprojected_area",
+    "projected_area",
+    "longitude_difference",
+    "latitude_difference",
+    "n_vertices",
+    "shape_length",
+    "complexity",
+    "inverse_average_segment_length",
+    "vertices_per_area",
+    "average_complexity_per_segment",
+    "isoperimetric_quotient",
+    "mean_distance_to_neighbors",
+    'nearest_neighbor_distance'
+]
+
+MATERIALS = [
+    "material_pct_concrete",
+    "material_pct_metal",
+    "material_pct_glass",
+    "material_pct_plastic",
+    "material_pct_asphalt",
+    "material_pct_brick",
+    "material_pct_human_body",
+    "material_pct_wood",
+    "material_pct_plaster",
+    "material_pct_leaf",
+]
+
+BUILDING_HEIGHT = "building_height"
+
+all_features = []
+all_features.extend(FOOTPRINT_FEATURES)
+all_features.extend(MATERIALS)
+all_features.append(BUILDING_HEIGHT)
+
+#Keep only the features that the models use.
+ids_sanfrancisco = list(gdf_sanfrancisco["building_id"])
+data_sanfrancisco = gdf_sanfrancisco[all_features].to_numpy()
+ids_sanfrancisco_nums = [int(x.split("_")[-1]) for x in ids_sanfrancisco]
+ground_truth_sanfrancisco = ground_truth_sanfrancisco[ground_truth_sanfrancisco.index.isin(ids_sanfrancisco_nums)]
+```
+
+### Extracting the ground truths
+
+```{python}
+heights_sanfrancisco = ground_truth_sanfrancisco["building_height"]
+```
+
+
+### Training the single XGBoost
+```{python}
+#A function to split the data into training and validation sets.
+
+def train_split(data, labels, train_percentage = 0.8, random_state = 42):
+    n_data = np.size(data, 0)
+    n_train = int(train_percentage*n_data)
+    n_validation = n_data - n_train
+
+    #Ok, now I need to pick elements
+    np.random.seed(random_state)
+    indices_train = np.random.choice(data.shape[0], size=n_train, replace=False)
+    initial_indices = list(range(n_data))
+    indices_val = [x for x in initial_indices if x not in indices_train]
+    training_data = data[indices_train]
+    validation_data = data[indices_val]
+
+    training_labels = labels[indices_train]
+    validation_labels = labels[indices_val]
+
+    results = {}
+    results["x_train"] = training_data
+    results["x_val"] = validation_data
+    results["y_train"] = training_labels
+    results["y_val"] = validation_labels
+    results["indices_train"] = indices_train
+    results["indices_val"] = indices_val
+
+
+    return results
+```
+
+Now let's train the model. 
+
+```{python}
+PARENT_PATH_EXPORT = Path("/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data")
+
+all_data = data_sanfrancisco.copy()
+all_labels = heights_sanfrancisco.to_numpy()
+
+standard_scaler = joblib.load("/Users/legariapena.j/Documents/imageable-2026/imageable/data/models/cluster_ensemble_scaler_sanfrancisco.pkl")
+normalized_data = standard_scaler.transform(all_data)
+
+RANDOM_STATE = 85
+#Get the train/val split
+with open("/Users/legariapena.j/Documents/imageable-2026/imageable/data/training_validation_data/data_sanfrancisco.json") as f:
+    dictionaries_sanfrancisco = json.load(f)
+indices_train = np.array([ids_sanfrancisco.index(d["building_id"]) for d in dictionaries_sanfrancisco if d["data_type"] == "train"])
+indices_val = np.array([ids_sanfrancisco.index(d["building_id"]) for d in dictionaries_sanfrancisco if d["data_type"] == "validation"])
+
+#Parameters for the XGBoost estimator
+XGB_PARAMS = dict(
+    n_estimators=300,
+    max_depth=6,
+    learning_rate=0.05,
+    subsample=0.9,
+    colsample_bytree=0.9,
+    reg_lambda=1.0,
+    objective="reg:squarederror",
+    random_state=0,
+    n_jobs=-1,
+)
+
+#Define variables for the distinct data sets. 
+
+valid_train = normalized_data[indices_train]
+valid_train_labels = all_labels[indices_train]
+valid_val = normalized_data[indices_val]
+valid_val_labels = all_labels[indices_val]
+valid_train_indices = indices_train
+valid_val_indices = indices_val
+
+#Train the single XBBoost estimator.
+xgb_single_model = XGBRegressor(**XGB_PARAMS, early_stopping_rounds=50)
+xgb_single_model.fit(valid_train, valid_train_labels, eval_set=[(valid_val, valid_val_labels)], verbose=False)
+preds_single_xgb = xgb_single_model.predict(valid_val)
+
+#Export the model
+SINGLE_MODEL_PATH = PARENT_PATH_EXPORT/"single_xgb_model_sanfrancisco.pkl"
+joblib.dump(xgb_single_model, SINGLE_MODEL_PATH)
+
+#Get the model metrics. 
+single_model_metrics = obtain_model_metrics(
+    preds_single_xgb,
+    valid_val_labels
+)
+
+#Define some colors for style and plot the predicted vs. ground truth plot for all the validation instances.
+DRACULA_COLORS = {
+    "comment": "#6272a4",
+    "purple": "#bd93f9",
+    "red": "#ff5555",
+    "green": "#50fa7b",
+    "yellow": "#f1fa8c",
+    "pink": "#ff79c6",
+    "cyan": "#8be9fd",
+    "blue": "#44475a",
+    "orange": "#ffb86c"
+}
+
+plot_time_series(
+    preds_single_xgb,
+    valid_val_labels,
+    x_label = "Predictions - val",
+    y_label = "Ground truths",
+    color = DRACULA_COLORS["purple"],
+    linewidth = 0,
+    xticks_every = 0
+)
+print(single_model_metrics)
+```
+
+### Training the footprint-based model
+
+Let's run something similar to train a model that only uses footprint features.
+```{python}
+#Get only the indices of footprint features
+indices_footprints = [i for i in range(len(all_features)) if all_features[i] in FOOTPRINT_FEATURES]
+
+#Reduce the dimensions using only the footprint features.
+footprint_data = normalized_data[:, indices_footprints]
+
+#Get the train/va. split.
+valid_train = footprint_data[indices_train]
+valid_train_labels = all_labels[indices_train]
+valid_val = footprint_data[indices_val]
+valid_val_labels = all_labels[indices_val]
+valid_train_indices = indices_train
+valid_val_indices = indices_val
+
+
+# Train the footprint-based model using the same XGBoost configuration that we used for the single model. 
+xgb_footprint_model = XGBRegressor(**XGB_PARAMS, early_stopping_rounds=50)
+xgb_footprint_model.fit(valid_train, valid_train_labels, eval_set=[(valid_val, valid_val_labels)], verbose=False)
+preds_footprint_xgb = xgb_footprint_model.predict(valid_val)
+
+#Export the footprint-based model.
+FOOTPRINT_MODEL_PATH = PARENT_PATH_EXPORT/"footprint_xgb_model_sanfrancisco.pkl"
+joblib.dump(xgb_footprint_model, FOOTPRINT_MODEL_PATH)
+
+#Get the model metrics and print them.
+footprint_model_metrics = obtain_model_metrics(
+    preds_footprint_xgb,
+    valid_val_labels
+)
+
+print(footprint_model_metrics)
+
+#Plot the predicted vs. ground truth plot for the validation instances. 
+plot_time_series(
+    preds_footprint_xgb,
+    valid_val_labels,
+    x_label = "Predictions - val",
+    y_label = "Ground truths",
+    color = "purple",
+    linewidth = 0,
+    xticks_every = 0
+)
+```
+
+### Comparison of the models over multiple random seed values
+
+```{python}
+clustering_indices = list(range(len(all_features) - 1))
+
+SEEDS = range(20, 50)
+result_dictionaries = []
+
+for seed in SEEDS:
+    #Get the train/val split for the given seed.
+    #This split will feed the CTP and single XGBoost. 
+    split_results = train_split(normalized_data, all_labels, train_percentage=0.8, random_state=seed)
+
+    #Get the train/val split for the footprint-based model.
+    split_results_footprint = train_split(footprint_data, all_labels, train_percentage=0.8, random_state=seed)
+
+    #Clean the data for the CTP and single XGBoost models
+    mask_train = np.isfinite(split_results["x_train"]).all(axis=1)
+    mask_val = np.isfinite(split_results["x_val"]).all(axis=1)
+
+    x_train_clean = split_results["x_train"][mask_train]
+    y_train_clean = split_results["y_train"][mask_train]
+    x_val_clean = split_results["x_val"][mask_val]
+    y_val_clean = split_results["y_val"][mask_val]
+
+    #Clean the data for the footprint-based model. 
+    mask_train_footprint = np.isfinite(split_results_footprint["x_train"]).all(axis=1)
+    mask_val_footprint = np.isfinite(split_results_footprint["x_val"]).all(axis=1)
+
+    x_train_footprint_clean = split_results_footprint["x_train"][mask_train_footprint]
+    y_train_footprint_clean = split_results_footprint["y_train"][mask_train_footprint]
+    x_val_footprint_clean = split_results_footprint["x_val"][mask_val_footprint]
+    y_val_footprint_clean = split_results_footprint["y_val"][mask_val_footprint]
+
+    #Iterate over many number of clusters for the CTP. Keep the one with the best RMSE. 
+    best_k = None
+    rmse = float("Inf")
+    k_curve = {}
+    size_curve = {}
+    inner = train_split(x_train_clean, y_train_clean, train_percentage=0.8, random_state=seed)
+    for k in tqdm(range(2, 14)):
+         m = ClusterWeightedEnsembleWrapper(
+            n_clusters=k,
+            model_factory=choose_model_for_cluster_xgb,
+            kmeans_kwargs={"n_init": 10, "random_state": RANDOM_STATE},
+            feature_indices_used_for_clustering=clustering_indices,
+            decay_constant=0.1,
+            outside_weight_tau=170)
+
+         m.fit(inner["x_train"], inner["y_train"])
+         predictions = m.predict(inner["x_val"])
+         metrics = obtain_model_metrics(predictions, inner["y_val"])
+         k_curve[k] = metrics["rmse"]
+         size_curve[k] = int(np.bincount(m._kmeans.labels_, minlength=k).min())
+         if(metrics["rmse"]<rmse):
+              rmse = metrics["rmse"]
+              best_k = k
+
+    results_dictionary = {}
+    model = ClusterWeightedEnsembleWrapper(
+            n_clusters=best_k,
+            model_factory=choose_model_for_cluster_xgb,
+            kmeans_kwargs={"n_init": 10, "random_state": RANDOM_STATE},
+            feature_indices_used_for_clustering=clustering_indices,
+            decay_constant=0.1,
+            outside_weight_tau=170)
+    #Evaluate the 3 models that we are comparing.
+    model.fit(x_train_clean, y_train_clean)
+    predictions = model.predict(x_val_clean)
+    metrics = obtain_model_metrics(predictions, y_val_clean)
+    results_dictionary["cluster_then_predict_rmse"] = metrics["rmse"]
+
+    xgb_model = XGBRegressor(**XGB_PARAMS)
+    xgb_model.fit(x_train_clean, y_train_clean)
+    rmse_xgb = compute_rmse(xgb_model.predict(x_val_clean), y_val_clean)
+    results_dictionary["universal_model_rmse"] = rmse_xgb
+
+    xgb_model_footprint = XGBRegressor(**XGB_PARAMS)
+    xgb_model_footprint.fit(x_train_footprint_clean, y_train_footprint_clean)
+    rmse_xgb_footprint = compute_rmse(xgb_model_footprint.predict(x_val_footprint_clean), y_val_footprint_clean)
+    results_dictionary["footprint_model_rmse"] = rmse_xgb_footprint
+
+    results_dictionary["best_k"] = best_k
+    results_dictionary["k_curve"] = k_curve
+    results_dictionary["min_cluster_size"] = size_curve
+    result_dictionaries.append(results_dictionary)
+    print(results_dictionary)
+
+
+#In the end we export
+path = PARENT_PATH_EXPORT/"results_universal_vs_cluster_sanfrancisco.json"
+#Export the data.
+path.parent.mkdir(parents=True, exist_ok=True)
+
+with open(path, "w") as f:
+    json.dump(result_dictionaries, f, indent=2)
+
+print("Saved to", path)
+```
+
+### Choosing K for the cluster-then-predict model (CTP)
+
+```{python}
+MIN_CLUSTER_SIZE = 25
+K_CHOSEN = 3
+
+k_grid = sorted(result_dictionaries[0]["k_curve"].keys())
+curves = np.array([[d["k_curve"][k] for k in k_grid] for d in result_dictionaries])
+sizes = np.array([[d["min_cluster_size"][k] for k in k_grid] for d in result_dictionaries])
+
+#Get the mean error of the k-RMSE curve averaging over all seeds.
+mean_curve = curves.mean(axis = 0)
+se_curve = curves.std(axis = 0, ddof = 1)/np.sqrt(len(curves))
+worst_size = sizes.min(axis = 0)
+
+too_small = [k_grid[i] for i in range(len(k_grid)) if worst_size[i] < MIN_CLUSTER_SIZE]
+k_cut = too_small[0] if len(too_small) > 0 else None
+
+print(f"Seeds averaged: {len(curves)}")
+print(f"Smallest group falls below {MIN_CLUSTER_SIZE} at k = {k_cut}")
+print(f"k chosen: {K_CHOSEN}")
+print()
+
+for i, k in enumerate(k_grid):
+    mark = "   <-- chosen" if k == K_CHOSEN else ""
+    print(f"   k = {k:>2}   mean held-out RMSE {mean_curve[i]:.4f} +/- {se_curve[i]:.4f}"
+          f"   smallest group {worst_size[i]:>5}{mark}")
+
+fig, ax = plot_time_series(
+    k_grid,
+    mean_curve,
+    x_label = "k",
+    y_label = "Mean held-out RMSE",
+    indexes_to_label = [k_grid.index(K_CHOSEN)],
+    color = DRACULA_COLORS["green"],
+    highlight_color = DRACULA_COLORS["orange"],
+    figsize = (10, 4),
+    show = False
+)
+ax.errorbar(k_grid, mean_curve, yerr = se_curve, fmt = "none", ecolor = DRACULA_COLORS["green"], capsize = 3)
+if k_cut is not None:
+    ax.axvspan(k_cut - 0.5, k_grid[-1] + 0.5, color = DRACULA_COLORS["red"], alpha = 0.15)
+plt.show()
+
+#Saving the averaged curve too, so the choice can be checked without re-running the sweep
+K_CURVE_PATH = PARENT_PATH_EXPORT/"k_mean_inner_curve_sanfrancisco.json"
+with open(K_CURVE_PATH, "w") as f:
+    json.dump({
+        "k": k_grid,
+        "mean_rmse": mean_curve.tolist(),
+        "se_rmse": se_curve.tolist(),
+        "smallest_group": worst_size.tolist(),
+        "per_seed_best_k": [d["best_k"] for d in result_dictionaries],
+        "min_cluster_size": MIN_CLUSTER_SIZE,
+        "k_cut": k_cut,
+        "k_chosen": K_CHOSEN,
+    }, f, indent = 2)
+
+print("Saved to", K_CURVE_PATH)
+```
+
+### Training the cluster-then-predict (CTP) model
+
+```{python}
+
+#Let's train the CTP
+K = 3
+#We exclude the SVI height from the list of features used for clustering.
+clustering_indices = list(range(len(all_features) - 1))
+
+#Create the CTP object
+cluster_then_predict = ClusterWeightedEnsembleWrapper(
+    n_clusters = K,
+    model_factory = choose_model_for_cluster_xgb,
+    kmeans_kwargs={"n_init": 10, "random_state": RANDOM_STATE},
+    feature_indices_used_for_clustering=clustering_indices,
+    early_stopping_rounds=50,
+    decay_constant=0.1,
+    outside_weight_tau=170
+)
+
+#Obtain the train/val split. 
+valid_train = normalized_data[indices_train]
+valid_train_labels = all_labels[indices_train]
+valid_val = normalized_data[indices_val]
+valid_val_labels = all_labels[indices_val]
+valid_train_indices = indices_train
+valid_val_indices = indices_val
+
+#Train the CTP.
+cluster_then_predict = cluster_then_predict.fit(valid_train, valid_train_labels, valid_val, valid_val_labels)
+preds_cluster_then_predict = cluster_then_predict.predict(valid_val)
+
+
+#Get the CTP metrics and print them.
+cluster_then_predict_metrics = obtain_model_metrics(
+    preds_cluster_then_predict,
+    valid_val_labels
+)
+
+print(cluster_then_predict_metrics)
+
+plot_time_series(
+    preds_cluster_then_predict,
+    valid_val_labels,
+    x_label = "Predictions - val",
+    y_label = "Ground truths",
+    color = DRACULA_COLORS["purple"],
+    linewidth = 0,
+    xticks_every = 0
+)
+
+#Export the CTP model.
+MODEL_FILE_NAME = "cluster_ensemble_model_sanfrancisco.pkl"
+cluster_then_predict.export_model(
+    save_dir = PARENT_PATH_EXPORT,
+    filename = "cluster_ensemble_model_sanfrancisco"
+)
+SCALER_PATH = PARENT_PATH_EXPORT/"cluster_ensemble_scaler_sanfrancisco.pkl"
+joblib.dump(standard_scaler, SCALER_PATH)
+```
+
+### Exporting the training and validation data
+```{python}
+
+#Training
+n_training = len(valid_train)
+all_dictionaries = []
+
+for i in range(n_training):
+    feature_vector = valid_train[i,:]
+    index = valid_train_indices[i]
+    city = "San Francisco"
+    data_type = "train"
+    cluster = np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(1, -1)))
+    real_height = valid_train_labels[i]
+
+
+    dictionary = {
+        "feature_names": all_features,
+        "features":feature_vector.tolist(),
+        "index":index,
+        "building_id": ids_sanfrancisco[index],
+        "city": city,
+        "data_type": data_type,
+        "cluster":cluster,
+        "real_height":real_height
+    }
+    all_dictionaries.append(dictionary)
+
+
+for i in range(len(valid_val)):
+    feature_vector = valid_val[i,:]
+    index = valid_val_indices[i]
+    city = "San Francisco"
+    data_type = "validation"
+    cluster = np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(1, -1)))
+    real_height = valid_val_labels[i]
+
+
+    dictionary = {
+        "feature_names": all_features,
+        "features":feature_vector.tolist(),
+        "index":index,
+        "building_id": ids_sanfrancisco[index],
+        "city": city,
+        "data_type": data_type,
+        "cluster":cluster,
+        "real_height":real_height
+    }
+
+    all_dictionaries.append(dictionary)
+
+
+
+EXPORT_PATH_DICTS = PARENT_PATH_EXPORT/"data_sanfrancisco.json"
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, (np.integer,)):
+            return int(obj)
+        if isinstance(obj, (np.floating,)):
+            return float(obj)
+        return super().default(obj)
+
+with open(EXPORT_PATH_DICTS, "w") as f:
+    json.dump(all_dictionaries, f, indent=2, cls=NumpyEncoder)
+```
