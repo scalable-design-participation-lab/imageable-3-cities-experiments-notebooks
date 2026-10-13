@@ -259,12 +259,12 @@ PARENT_PATH_EXPORT = Path("/Users/legariapena.j/Documents/imageable-2026/imageab
 all_data = data_monterrey.copy()
 all_labels = heights_monterrey.to_numpy()
 
-standard_scaler = joblib.load("/Users/legariapena.j/Documents/imageable-2026/imageable/data/models/cluster_ensemble_scaler_monterrey.pkl")
+standard_scaler = joblib.load("/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_scaler_pooled_3_cities.pkl")
 normalized_data = standard_scaler.transform(all_data)
 
 RANDOM_STATE = 85
 #Get the train/val split
-with open("/Users/legariapena.j/Documents/imageable-2026/imageable/data/training_validation_data/data_monterrey.json") as f:
+with open("/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_monterrey.json") as f:
     dictionaries_monterrey = json.load(f)
 indices_train = np.array([d["index"] for d in dictionaries_monterrey if d["data_type"] == "train"])
 indices_val = np.array([d["index"] for d in dictionaries_monterrey if d["data_type"] == "validation"])
@@ -598,75 +598,4 @@ cluster_then_predict.export_model(
     save_dir = PARENT_PATH_EXPORT,
     filename = "cluster_ensemble_model_monterrey"
 )
-SCALER_PATH = PARENT_PATH_EXPORT/"cluster_ensemble_scaler_monterrey.pkl"
-joblib.dump(standard_scaler, SCALER_PATH)
-```
-
-### Exporting the training and validation data
-```{python}
-
-#Training
-n_training = len(valid_train)
-all_dictionaries = []
-
-for i in range(n_training):
-    feature_vector = valid_train[i,:]
-    index = valid_train_indices[i]
-    city = "Monterrey"
-    data_type = "train"
-    cluster = np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(1, -1)))
-    real_height = valid_train_labels[i]
-
-
-    dictionary = {
-        "feature_names": all_features,
-        "features":feature_vector.tolist(),
-        "index":index,
-        "building_id": ids_monterrey[index],
-        "city": city,
-        "data_type": data_type,
-        "cluster":cluster,
-        "real_height":real_height
-    }
-    all_dictionaries.append(dictionary)
-
-
-for i in range(len(valid_val)):
-    feature_vector = valid_val[i,:]
-    index = valid_val_indices[i]
-    city = "Monterrey"
-    data_type = "validation"
-    cluster = np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(1, -1)))
-    real_height = valid_val_labels[i]
-
-
-    dictionary = {
-        "feature_names": all_features,
-        "features":feature_vector.tolist(),
-        "index":index,
-        "building_id": ids_monterrey[index],
-        "city": city,
-        "data_type": data_type,
-        "cluster":cluster,
-        "real_height":real_height
-    }
-
-    all_dictionaries.append(dictionary)
-
-
-
-EXPORT_PATH_DICTS = PARENT_PATH_EXPORT/"data_monterrey.json"
-
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        if isinstance(obj, (np.integer,)):
-            return int(obj)
-        if isinstance(obj, (np.floating,)):
-            return float(obj)
-        return super().default(obj)
-
-with open(EXPORT_PATH_DICTS, "w") as f:
-    json.dump(all_dictionaries, f, indent=2, cls=NumpyEncoder)
 ```
