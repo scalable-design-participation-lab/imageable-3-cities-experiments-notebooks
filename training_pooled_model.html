@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Uriel Legaria">
+
+<title>Model training — 3 cities</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="training_pooled_model_files/libs/clipboard/clipboard.min.js"></script>
+<script src="training_pooled_model_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="training_pooled_model_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="training_pooled_model_files/libs/quarto-html/popper.min.js"></script>
+<script src="training_pooled_model_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="training_pooled_model_files/libs/quarto-html/anchor.min.js"></script>
+<link href="training_pooled_model_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="training_pooled_model_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="training_pooled_model_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="training_pooled_model_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="training_pooled_model_files/libs/bootstrap/bootstrap-917079515d91bccb85b543faf8aa8bb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model training — 3 cities</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Uriel Legaria </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="define-metrics-calculation-functions" class="level3">
+<h3 class="anchored" data-anchor-id="define-metrics-calculation-functions">Define metrics calculation functions</h3>
+<div id="e38f51cf" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> xgboost <span class="im">import</span> XGBRegressor</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> joblib</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> imageable.visualization.data_visualization <span class="im">import</span> plot_time_series</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> imageable._correction_ensembles.cluster_weighted_ensemble <span class="im">import</span> ClusterWeightedEnsembleWrapper</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> imageable._correction_ensembles.model_factories <span class="im">import</span> choose_model_for_cluster_xgb</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_mse(ground_truths, predicted_values):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    mse <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    n_data <span class="op">=</span> <span class="bu">len</span>(ground_truths)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_data):</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        y_truth <span class="op">=</span> ground_truths[i]</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        y_predicted <span class="op">=</span> predicted_values[i]</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        mse <span class="op">+=</span> ((y_truth <span class="op">-</span> y_predicted)<span class="op">**</span><span class="dv">2</span>)<span class="op">/</span>n_data</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_rmse(ground_truths, predicted_values):</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    mse <span class="op">=</span> compute_mse(ground_truths, predicted_values)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.sqrt(mse)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_mae(ground_truths, predicted_values):</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    mae <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    n_data <span class="op">=</span> <span class="bu">len</span>(ground_truths)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_data):</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        y_truth <span class="op">=</span> ground_truths[i]</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        y_predicted <span class="op">=</span> predicted_values[i]</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        mae <span class="op">+=</span> np.<span class="bu">abs</span>(y_truth <span class="op">-</span> y_predicted)<span class="op">/</span>n_data</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mae</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> obtain_model_metrics(preds, ground_truths):</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    mse <span class="op">=</span> compute_mse(preds, ground_truths)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    rmse <span class="op">=</span> compute_rmse(preds, ground_truths)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    mae <span class="op">=</span> compute_mae(preds, ground_truths)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    r2_val <span class="op">=</span> r2_score(ground_truths, preds)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mse"</span>:mse,</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rmse"</span>:rmse,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mae"</span>:mae,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"r2_val"</span>:r2_val</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="opening-the-ground-truth-data" class="level4">
+<h4 class="anchored" data-anchor-id="opening-the-ground-truth-data">Opening the ground truth data</h4>
+<div id="cc0af6a5" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>PARENT_PATH <span class="op">=</span> Path(<span class="st">"/Users/legariapena.j/Library/CloudStorage/GoogleDrive-legariapena.j@husky.neu.edu/Shared drives/Cool and Carbon Free Africa/Building Image Datasets/data"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Ground truth boston</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>GROUND_TRUTH_BOSTON_PATH <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"boston"</span><span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"labelled_buildings_meters.geojson"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ground_truth_boston <span class="op">=</span> gpd.read_file(GROUND_TRUTH_BOSTON_PATH)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#All buildings boston</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>ALL_BUILDINGS_BOSTON_PATH <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"boston"</span><span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"boston_buildings.geojson"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>all_buildings_boston <span class="op">=</span> gpd.read_file(ALL_BUILDINGS_BOSTON_PATH)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#San Francisco uses a different parent path</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>PARENT_PATH_SAN_FRANCISCO <span class="op">=</span> Path(<span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/data/sanfrancisco_data"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#Ground truths San Francisco</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>GROUND_TRUTH_SF_PATH <span class="op">=</span> PARENT_PATH_SAN_FRANCISCO<span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"Building_Footprints_sample_10000.geojson"</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>ground_truth_san_francisco <span class="op">=</span> gpd.read_file(GROUND_TRUTH_SF_PATH)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#All buildings San Francisco</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ALL_BUILDINGS_SF_PATH <span class="op">=</span> PARENT_PATH_SAN_FRANCISCO<span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"Building_Footprints_20260820.geojson"</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>all_buildings_san_francisco <span class="op">=</span> gpd.read_file(ALL_BUILDINGS_SF_PATH)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#Ground truth Monterrey</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>GROUND_TRUTH_MONTERREY_PATH <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"monterrey"</span><span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"labelled_buildings_expanded.geojson"</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>ground_truth_monterrey <span class="op">=</span> gpd.read_file(GROUND_TRUTH_MONTERREY_PATH)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#All buildings monterrey</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>ALL_BUILDINGS_MONTERREY_PATH <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"monterrey"</span><span class="op">/</span><span class="st">"footprints"</span><span class="op">/</span><span class="st">"all_buildings_dedup.geojson"</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>all_buildings_monterrey <span class="op">=</span> gpd.read_file(ALL_BUILDINGS_MONTERREY_PATH)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>ground_truth_san_francisco.head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">:id</th>
+<th data-quarto-table-cell-role="th">:version</th>
+<th data-quarto-table-cell-role="th">:created_at</th>
+<th data-quarto-table-cell-role="th">:updated_at</th>
+<th data-quarto-table-cell-role="th">sf16_bldgid</th>
+<th data-quarto-table-cell-role="th">area_id</th>
+<th data-quarto-table-cell-role="th">mblr</th>
+<th data-quarto-table-cell-role="th">p2010_name</th>
+<th data-quarto-table-cell-role="th">p2010_zminn88ft</th>
+<th data-quarto-table-cell-role="th">p2010_zmaxn88ft</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">peak_1st_m</th>
+<th data-quarto-table-cell-role="th">globalid</th>
+<th data-quarto-table-cell-role="th">data_as_of</th>
+<th data-quarto-table-cell-role="th">data_loaded_at</th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">lon</th>
+<th data-quarto-table-cell-role="th">lat</th>
+<th data-quarto-table-cell-role="th">building_height</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>row-df9e~vtm4.cft2</td>
+<td>rv-4ase.chzb.6iq7</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>201006.0066993</td>
+<td>66993</td>
+<td>SF1294034</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>...</td>
+<td>140.12</td>
+<td>{B6F2FD7A-B9F8-47C8-B31B-F02D79CE0E4D}</td>
+<td>2023-09-11 12:00:00</td>
+<td>2026-08-20 10:19:44.118</td>
+<td>548493.106022</td>
+<td>4.179400e+06</td>
+<td>-122.449457</td>
+<td>37.760635</td>
+<td>11.01</td>
+<td>MULTIPOLYGON (((-122.44942 37.76066, -122.4494...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>row-jyxd.fedf_bnca</td>
+<td>rv-iu7i.vwpa.6mc6</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>201006.0066995</td>
+<td>66995</td>
+<td>SF6984025</td>
+<td>SanfranP_0193.flt</td>
+<td>319.2944</td>
+<td>364.97320000000002</td>
+<td>...</td>
+<td>109.28</td>
+<td>{86BA6FF1-1F76-4F2A-B5E4-DA45159B3FD4}</td>
+<td>2023-09-11 12:00:00</td>
+<td>2026-08-20 10:19:44.118</td>
+<td>547681.247354</td>
+<td>4.174934e+06</td>
+<td>-122.458966</td>
+<td>37.720425</td>
+<td>8.57</td>
+<td>MULTIPOLYGON (((-122.45906 37.72046, -122.4589...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>row-hs9g~4rbz~95dr</td>
+<td>rv-zjpq_43gw_agct</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>201006.0067025</td>
+<td>67025</td>
+<td>SF3106012A</td>
+<td>SanfranO_04134.flt</td>
+<td>404.3612</td>
+<td>427.46480000000003</td>
+<td>...</td>
+<td>131.33000000000001</td>
+<td>{D712745F-7AC5-4EE4-A624-E41B5646D53A}</td>
+<td>2023-09-11 12:00:00</td>
+<td>2026-08-20 10:19:44.118</td>
+<td>547562.519276</td>
+<td>4.175918e+06</td>
+<td>-122.460249</td>
+<td>37.729295</td>
+<td>6.02</td>
+<td>MULTIPOLYGON (((-122.46018 37.72935, -122.4601...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>row-wzvi.p5dz.3cea</td>
+<td>rv-jvc4-suuu_jpi8</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>201006.0067070</td>
+<td>67070</td>
+<td>SF2059001A</td>
+<td>SanfranQ_0983.flt</td>
+<td>385.7851</td>
+<td>409.20269999999999</td>
+<td>...</td>
+<td>112.66</td>
+<td>{D04C2D55-011A-4DC3-B047-041C744F2B92}</td>
+<td>2023-09-11 12:00:00</td>
+<td>2026-08-20 10:19:44.118</td>
+<td>545815.551542</td>
+<td>4.178621e+06</td>
+<td>-122.479903</td>
+<td>37.753747</td>
+<td>10.37</td>
+<td>MULTIPOLYGON (((-122.47992 37.75378, -122.4798...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>row-8byv-efu8~ui2s</td>
+<td>rv-x59y-yiqk_y6mq</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>2026-08-20 17:20:38.313000+00:00</td>
+<td>201006.0067081</td>
+<td>67081</td>
+<td>SF4266051</td>
+<td>SanfranH_06944.flt</td>
+<td>49.659500000000001</td>
+<td>94.169200000000004</td>
+<td>...</td>
+<td>28.5</td>
+<td>{71F6331F-E31F-4FEC-9E2F-3F6EBE720C41}</td>
+<td>2023-09-11 12:00:00</td>
+<td>2026-08-20 10:19:44.118</td>
+<td>552155.121768</td>
+<td>4.178511e+06</td>
+<td>-122.407948</td>
+<td>37.752424</td>
+<td>12.02</td>
+<td>MULTIPOLYGON (((-122.40783 37.7524, -122.40788...</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 54 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="opening-the-footprint-batches" class="level4">
+<h4 class="anchored" data-anchor-id="opening-the-footprint-batches">Opening the footprint batches</h4>
+<p>These batches were obtained through application of the Imageable library.</p>
+<div id="03984b9f" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>BATCHES_NAMES <span class="op">=</span> [<span class="st">"1-1000"</span>, <span class="st">"1000-2000"</span>, <span class="st">"2000-3000"</span>, <span class="st">"3000-4000"</span>, <span class="st">"4000-5000"</span>, <span class="st">"5000-6000"</span>, <span class="st">"6000-7000"</span>, <span class="st">"7000-8000"</span>, <span class="st">"8000-9000"</span>, <span class="st">"9000-10000"</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>monterrey_geojsons <span class="op">=</span> {}</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">20</span>,<span class="dv">21</span>,<span class="dv">22</span>,<span class="dv">23</span>,<span class="dv">24</span>,<span class="dv">25</span>,<span class="dv">26</span>]:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(i <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        first_index <span class="op">=</span> i<span class="op">*</span><span class="dv">1000</span> <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        first_index <span class="op">=</span> i<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    second_index <span class="op">=</span> (i<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    first_string <span class="op">=</span> <span class="st">"Images "</span><span class="op">+</span><span class="ss">f"</span><span class="sc">{</span>first_index<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>second_index<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"monterrey_dedup"</span><span class="op">/</span>first_string<span class="op">/</span><span class="ss">f"building_data_</span><span class="sc">{</span>first_index<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>second_index<span class="sc">}</span><span class="ss">.geojson"</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    monterrey_geojsons[<span class="ss">f"</span><span class="sc">{</span>first_index<span class="sc">}</span><span class="ss">-</span><span class="sc">{</span>second_index<span class="sc">}</span><span class="ss">"</span>] <span class="op">=</span> gpd.read_file(file_path)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>boston_geojsons <span class="op">=</span> {}</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(i <span class="op">==</span> <span class="dv">0</span>):</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        first_index <span class="op">=</span> i<span class="op">*</span><span class="dv">1000</span><span class="op">+</span><span class="dv">1</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        first_index <span class="op">=</span> i<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    second_index <span class="op">=</span> (i<span class="op">+</span><span class="dv">1</span>)<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    first_string <span class="op">=</span> <span class="st">"Images "</span><span class="op">+</span><span class="ss">f"</span><span class="sc">{</span>first_index<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>second_index<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> PARENT_PATH<span class="op">/</span><span class="st">"boston"</span><span class="op">/</span>first_string<span class="op">/</span><span class="ss">f"building_data_</span><span class="sc">{</span>first_index<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>second_index<span class="sc">}</span><span class="ss">.geojson"</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    boston_geojsons[BATCHES_NAMES[i]] <span class="op">=</span> gpd.read_file(file_path)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#For San Francisco we have a single file</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>SAN_FRANCISCO_RESULTS_PATH <span class="op">=</span> PARENT_PATH_SAN_FRANCISCO<span class="op">/</span><span class="st">"labelled_footprints"</span><span class="op">/</span><span class="st">"san_francisco_results.geojson"</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>san_francisco_geojson <span class="op">=</span> gpd.read_file(SAN_FRANCISCO_RESULTS_PATH)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>boston_geojsons[<span class="st">"1000-2000"</span>].head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">unprojected_area</th>
+<th data-quarto-table-cell-role="th">projected_area</th>
+<th data-quarto-table-cell-role="th">longitude_difference</th>
+<th data-quarto-table-cell-role="th">latitude_difference</th>
+<th data-quarto-table-cell-role="th">n_vertices</th>
+<th data-quarto-table-cell-role="th">shape_length</th>
+<th data-quarto-table-cell-role="th">complexity</th>
+<th data-quarto-table-cell-role="th">inverse_average_segment_length</th>
+<th data-quarto-table-cell-role="th">vertices_per_area</th>
+<th data-quarto-table-cell-role="th">average_complexity_per_segment</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">number_of_edges</th>
+<th data-quarto-table-cell-role="th">number_of_vertices</th>
+<th data-quarto-table-cell-role="th">average_window_x</th>
+<th data-quarto-table-cell-role="th">average_window_y</th>
+<th data-quarto-table-cell-role="th">average_door_x</th>
+<th data-quarto-table-cell-role="th">average_door_y</th>
+<th data-quarto-table-cell-role="th">number_of_windows</th>
+<th data-quarto-table-cell-role="th">number_of_doors</th>
+<th data-quarto-table-cell-role="th">building_id</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1.625481e-08</td>
+<td>272.548229</td>
+<td>0.000235</td>
+<td>0.000128</td>
+<td>29</td>
+<td>0.000677</td>
+<td>41628.592348</td>
+<td>42857.244262</td>
+<td>1.784087e+09</td>
+<td>1435.468702</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>building_1001</td>
+<td>POLYGON ((-71.15676 42.34845, -71.15677 42.348...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>2.076492e-08</td>
+<td>348.171120</td>
+<td>0.000249</td>
+<td>0.000110</td>
+<td>14</td>
+<td>0.000648</td>
+<td>31184.213707</td>
+<td>21620.365920</td>
+<td>6.742141e+08</td>
+<td>2227.443836</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>building_1002</td>
+<td>POLYGON ((-71.15688 42.34862, -71.15689 42.348...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>1.408153e-08</td>
+<td>236.111892</td>
+<td>0.000171</td>
+<td>0.000089</td>
+<td>6</td>
+<td>0.000503</td>
+<td>35721.389460</td>
+<td>11928.145615</td>
+<td>4.260899e+08</td>
+<td>5953.564910</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>building_1003</td>
+<td>POLYGON ((-71.15671 42.3493, -71.15671 42.3493...</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1.003160e-08</td>
+<td>168.201590</td>
+<td>0.000186</td>
+<td>0.000097</td>
+<td>8</td>
+<td>0.000454</td>
+<td>45297.829992</td>
+<td>17605.258992</td>
+<td>7.974800e+08</td>
+<td>5662.228749</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>building_1004</td>
+<td>POLYGON ((-71.15674 42.3482, -71.1569 42.34824...</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>5.307786e-09</td>
+<td>88.997032</td>
+<td>0.000113</td>
+<td>0.000078</td>
+<td>10</td>
+<td>0.000303</td>
+<td>57089.363251</td>
+<td>33001.325477</td>
+<td>1.884025e+09</td>
+<td>5708.936325</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0</td>
+<td>0</td>
+<td>building_1005</td>
+<td>POLYGON ((-71.15689 42.34852, -71.15698 42.348...</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 43 columns</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="expanding-the-materials" class="level3">
+<h3 class="anchored" data-anchor-id="expanding-the-materials">Expanding the materials</h3>
+<p>The material column currently is a dictionary and needs to be expanded so that each material percentage has its own column.</p>
+<div id="5a9e908e" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Function to expand the material columns.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> expand_materials(gdf):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#This would be a list of dictionaries.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    materials <span class="op">=</span> <span class="bu">list</span>(gdf[<span class="st">"material_percentages"</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    materials <span class="op">=</span> [ast.literal_eval(x) <span class="cf">for</span> x <span class="kw">in</span> materials]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    ALL_MATERIALS <span class="op">=</span> [<span class="st">"asphalt"</span>,<span class="st">"concrete"</span>,<span class="st">"metal"</span>,<span class="st">"road_marking"</span>,<span class="st">"fabric_leather"</span>,<span class="st">"glass"</span>,<span class="st">"plaster"</span>, <span class="st">"plastic"</span>,<span class="st">"rubber"</span>,<span class="st">"sand"</span>, <span class="st">"gravel"</span>,<span class="st">"ceramic"</span>,<span class="st">"cobblestone"</span>,<span class="st">"brick"</span>,<span class="st">"grass"</span>,<span class="st">"wood"</span>,<span class="st">"leaf"</span>,<span class="st">"water"</span>,<span class="st">"human_body"</span>,<span class="st">"sky"</span>]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    BASE_STR <span class="op">=</span> <span class="st">"material_pct_"</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#These would be all the materials</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> ALL_MATERIALS</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(keys)):</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        material_name <span class="op">=</span> keys[i]</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        column_name <span class="op">=</span> BASE_STR<span class="op">+</span>material_name</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        column_values <span class="op">=</span> []</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> m <span class="kw">in</span> materials:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="co">#Case where the dictionary is empty</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span>(<span class="kw">not</span> m):</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                column_values.append(<span class="va">None</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>            <span class="co">#Case where there is a percentages option in m (need to check why this happens)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span>(material_name <span class="kw">not</span> <span class="kw">in</span> m <span class="kw">and</span> <span class="st">"percentages"</span> <span class="kw">in</span> m <span class="kw">and</span> material_name <span class="kw">in</span> m[<span class="st">"percentages"</span>]):</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                column_values.append(m[<span class="st">"percentages"</span>][material_name])</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            <span class="co">#Case where the dictionary just has materials: percentage.</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span>(material_name <span class="kw">in</span> m):</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>                column_values.append(m[material_name])</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(m)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(material_name)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        gdf[column_name] <span class="op">=</span> column_values</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gdf</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>keys_monterrey_geojsons <span class="op">=</span> <span class="bu">list</span>(monterrey_geojsons.keys())</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#Expand the Monterrey batches.</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(keys_monterrey_geojsons)):</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    key <span class="op">=</span> keys_monterrey_geojsons[i]</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    monterrey_geojsons[key] <span class="op">=</span> expand_materials(monterrey_geojsons[key])</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="co">#Expand the Boston batches.</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>keys_boston_geojsons <span class="op">=</span> <span class="bu">list</span>(boston_geojsons.keys())</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(keys_boston_geojsons)):</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    key <span class="op">=</span> keys_boston_geojsons[i]</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    boston_geojsons[key] <span class="op">=</span> expand_materials(boston_geojsons[key])</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="co">#Expand the San Francisco results. </span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>san_francisco_geojson <span class="op">=</span> expand_materials(san_francisco_geojson)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>san_francisco_geojson.head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">unprojected_area</th>
+<th data-quarto-table-cell-role="th">projected_area</th>
+<th data-quarto-table-cell-role="th">longitude_difference</th>
+<th data-quarto-table-cell-role="th">latitude_difference</th>
+<th data-quarto-table-cell-role="th">n_vertices</th>
+<th data-quarto-table-cell-role="th">shape_length</th>
+<th data-quarto-table-cell-role="th">complexity</th>
+<th data-quarto-table-cell-role="th">inverse_average_segment_length</th>
+<th data-quarto-table-cell-role="th">vertices_per_area</th>
+<th data-quarto-table-cell-role="th">average_complexity_per_segment</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">material_pct_gravel</th>
+<th data-quarto-table-cell-role="th">material_pct_ceramic</th>
+<th data-quarto-table-cell-role="th">material_pct_cobblestone</th>
+<th data-quarto-table-cell-role="th">material_pct_brick</th>
+<th data-quarto-table-cell-role="th">material_pct_grass</th>
+<th data-quarto-table-cell-role="th">material_pct_wood</th>
+<th data-quarto-table-cell-role="th">material_pct_leaf</th>
+<th data-quarto-table-cell-role="th">material_pct_water</th>
+<th data-quarto-table-cell-role="th">material_pct_human_body</th>
+<th data-quarto-table-cell-role="th">material_pct_sky</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1.417644e-08</td>
+<td>222.211314</td>
+<td>0.000136</td>
+<td>0.000154</td>
+<td>12</td>
+<td>0.000514</td>
+<td>36225.788166</td>
+<td>23366.629565</td>
+<td>8.464746e+08</td>
+<td>3018.815680</td>
+<td>...</td>
+<td>0.0</td>
+<td>0.011946</td>
+<td>0.011360</td>
+<td>0.000259</td>
+<td>0.000129</td>
+<td>0.000000</td>
+<td>0.057620</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.007905</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>1.416872e-08</td>
+<td>221.969552</td>
+<td>0.000232</td>
+<td>0.000071</td>
+<td>28</td>
+<td>0.000595</td>
+<td>41958.967693</td>
+<td>47098.031922</td>
+<td>1.976185e+09</td>
+<td>1498.534560</td>
+<td>...</td>
+<td>0.0</td>
+<td>0.037180</td>
+<td>0.041187</td>
+<td>0.004082</td>
+<td>0.006382</td>
+<td>0.000098</td>
+<td>0.103916</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.375916</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>1.416891e-08</td>
+<td>221.999226</td>
+<td>0.000174</td>
+<td>0.000119</td>
+<td>36</td>
+<td>0.000542</td>
+<td>38279.698733</td>
+<td>66373.920079</td>
+<td>2.540774e+09</td>
+<td>1063.324965</td>
+<td>...</td>
+<td>0.0</td>
+<td>0.001709</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000032</td>
+<td>0.000559</td>
+<td>0.111260</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.624458</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>1.416995e-08</td>
+<td>222.088847</td>
+<td>0.000207</td>
+<td>0.000078</td>
+<td>12</td>
+<td>0.000544</td>
+<td>38420.170193</td>
+<td>22042.132882</td>
+<td>8.468625e+08</td>
+<td>3201.680849</td>
+<td>...</td>
+<td>0.0</td>
+<td>0.009348</td>
+<td>0.102188</td>
+<td>0.000176</td>
+<td>0.008337</td>
+<td>0.000037</td>
+<td>0.002515</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.132705</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>1.416943e-08</td>
+<td>222.076638</td>
+<td>0.000269</td>
+<td>0.000079</td>
+<td>41</td>
+<td>0.000693</td>
+<td>48935.985946</td>
+<td>59129.373001</td>
+<td>2.893554e+09</td>
+<td>1193.560633</td>
+<td>...</td>
+<td>0.0</td>
+<td>0.014824</td>
+<td>0.028972</td>
+<td>0.000042</td>
+<td>0.001536</td>
+<td>0.001001</td>
+<td>0.062546</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.181816</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 63 columns</p>
+</div>
+</div>
+</div>
+<section id="reducing-the-number-of-features" class="level4">
+<h4 class="anchored" data-anchor-id="reducing-the-number-of-features">Reducing the number of features</h4>
+<p>We reduce the number of features to the ones used to train the models.</p>
+<div id="0757f9de" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FOOTPRINT_FEATURES <span class="op">=</span> [</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unprojected_area"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"projected_area"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"longitude_difference"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"latitude_difference"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"n_vertices"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shape_length"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"complexity"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"inverse_average_segment_length"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vertices_per_area"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"average_complexity_per_segment"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"isoperimetric_quotient"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mean_distance_to_neighbors"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nearest_neighbor_distance'</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>MATERIALS <span class="op">=</span> [</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_concrete"</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_metal"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_glass"</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_plastic"</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_asphalt"</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_brick"</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_human_body"</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_wood"</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_plaster"</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"material_pct_leaf"</span>,</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>BUILDING_HEIGHT <span class="op">=</span> <span class="st">"building_height"</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>all_features <span class="op">=</span> []</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>all_features.extend(FOOTPRINT_FEATURES)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>all_features.extend(MATERIALS)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>all_features.append(BUILDING_HEIGHT)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Combine all the batches for Monterrey and Boston. </span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>gdf_monterrey <span class="op">=</span> pd.concat(monterrey_geojsons.values(), ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>gdf_boston <span class="op">=</span> pd.concat(boston_geojsons.values(), ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="co">#For Monterrey keep only the rows that have a ground truth value.</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>ground_truth_monterrey <span class="op">=</span> ground_truth_monterrey.set_index(<span class="st">"building_id"</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>has_height <span class="op">=</span> gdf_monterrey[<span class="st">"building_id"</span>].isin(ground_truth_monterrey.index)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>rows_without_height <span class="op">=</span> (<span class="op">~</span>has_height).<span class="bu">sum</span>()</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>gdf_monterrey <span class="op">=</span> gdf_monterrey[has_height]</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>ids_monterrey <span class="op">=</span> <span class="bu">list</span>(gdf_monterrey[<span class="st">"building_id"</span>])</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only the features that the models use. </span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>data_monterrey <span class="op">=</span> gdf_monterrey[all_features].to_numpy()</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>labelled_without_features <span class="op">=</span> <span class="bu">set</span>(ground_truth_monterrey.index).difference(ids_monterrey)</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>ground_truth_monterrey <span class="op">=</span> ground_truth_monterrey.loc[ids_monterrey]</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="co">#Let's do the same for boston</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>ids_boston <span class="op">=</span> <span class="bu">list</span>(gdf_boston[<span class="st">"building_id"</span>])</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>data_boston <span class="op">=</span> gdf_boston[all_features].to_numpy()</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>ids_boston_nums <span class="op">=</span> [<span class="bu">int</span>(x.split(<span class="st">"_"</span>)[<span class="op">-</span><span class="dv">1</span>])<span class="op">-</span><span class="dv">1</span> <span class="cf">for</span> x <span class="kw">in</span> ids_boston]</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>ground_truth_boston <span class="op">=</span> ground_truth_boston[ground_truth_boston.index.isin(ids_boston_nums)]</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="co">#Now SF</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>ids_san_francisco <span class="op">=</span> <span class="bu">list</span>(san_francisco_geojson[<span class="st">"building_id"</span>])</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>data_san_francisco <span class="op">=</span> san_francisco_geojson[all_features].to_numpy()</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>ids_san_francisco_nums <span class="op">=</span> [<span class="bu">int</span>(x.split(<span class="st">"_"</span>)[<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> ids_san_francisco]</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>ground_truth_san_francisco <span class="op">=</span> ground_truth_san_francisco[ground_truth_san_francisco.index.isin(ids_san_francisco_nums)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="extracting-the-ground-truths" class="level3">
+<h3 class="anchored" data-anchor-id="extracting-the-ground-truths">Extracting the ground truths</h3>
+<div id="a6fcdad5" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>heights_monterrey <span class="op">=</span> ground_truth_monterrey[<span class="st">"height"</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>heights_boston <span class="op">=</span> ground_truth_boston[<span class="st">"height_meters"</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>heights_san_francisco <span class="op">=</span> ground_truth_san_francisco[<span class="st">"building_height"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="training-the-single-xgboost" class="level3">
+<h3 class="anchored" data-anchor-id="training-the-single-xgboost">Training the single XGBoost</h3>
+<p>Define a function to split the data.</p>
+<div id="044708f6" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_split(data, labels, train_percentage <span class="op">=</span> <span class="fl">0.8</span>, random_state <span class="op">=</span> <span class="dv">42</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    n_data <span class="op">=</span> np.size(data, <span class="dv">0</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    n_train <span class="op">=</span> <span class="bu">int</span>(train_percentage<span class="op">*</span>n_data)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    n_validation <span class="op">=</span> n_data <span class="op">-</span> n_train</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Ok, now I need to pick elements</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    np.random.seed(random_state)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    indices_train <span class="op">=</span> np.random.choice(data.shape[<span class="dv">0</span>], size<span class="op">=</span>n_train, replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    initial_indices <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(n_data))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    indices_val <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> initial_indices <span class="cf">if</span> x <span class="kw">not</span> <span class="kw">in</span> indices_train]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    training_data <span class="op">=</span> data[indices_train]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    validation_data <span class="op">=</span> data[indices_val]</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    training_labels <span class="op">=</span> labels[indices_train]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    validation_labels <span class="op">=</span> labels[indices_val]</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"x_train"</span>] <span class="op">=</span> training_data</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"x_val"</span>] <span class="op">=</span> validation_data</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"y_train"</span>] <span class="op">=</span> training_labels</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"y_val"</span>] <span class="op">=</span> validation_labels</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"indices_train"</span>] <span class="op">=</span> indices_train</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"indices_val"</span>] <span class="op">=</span> indices_val</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now let’s train the single XGBoost.</p>
+<div id="7b17d119" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>PARENT_PATH_EXPORT <span class="op">=</span> Path(<span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Combine all data (Monterrey, Boston, and San Francisco).</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>all_data <span class="op">=</span> np.concatenate((data_monterrey, data_boston, data_san_francisco), axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>all_labels <span class="op">=</span> np.concatenate((heights_monterrey, heights_boston, heights_san_francisco), axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>standard_scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>normalized_all_data <span class="op">=</span> standard_scaler.fit_transform(all_data)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the train/val split.</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>RANDOM_STATE <span class="op">=</span> <span class="dv">85</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>train_split_results <span class="op">=</span> train_split(</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> normalized_all_data,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> all_labels,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    train_percentage <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    random_state <span class="op">=</span> RANDOM_STATE</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#Parameters for the XGBoost estimator. </span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>XGB_PARAMS <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    subsample<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    colsample_bytree<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    reg_lambda<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    objective<span class="op">=</span><span class="st">"reg:squarederror"</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    n_jobs<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only the vectors where all entries are finite. </span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>mask_train <span class="op">=</span> np.isfinite(train_split_results[<span class="st">"x_train"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>mask_val <span class="op">=</span> np.isfinite(train_split_results[<span class="st">"x_val"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>valid_train <span class="op">=</span> train_split_results[<span class="st">"x_train"</span>][mask_train]</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>valid_train_labels <span class="op">=</span> train_split_results[<span class="st">"y_train"</span>][mask_train]</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>valid_val <span class="op">=</span> train_split_results[<span class="st">"x_val"</span>][mask_val]</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>valid_val_labels <span class="op">=</span> train_split_results[<span class="st">"y_val"</span>][mask_val]</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>valid_train_indices <span class="op">=</span> train_split_results[<span class="st">"indices_train"</span>][mask_train]</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>valid_val_indices <span class="op">=</span> np.array(train_split_results[<span class="st">"indices_val"</span>])[mask_val]</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the single XGBoost model. </span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>xgb_single_model <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS, early_stopping_rounds<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>xgb_single_model.fit(valid_train, valid_train_labels, eval_set<span class="op">=</span>[(valid_val, valid_val_labels)], verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>preds_single_xgb <span class="op">=</span> xgb_single_model.predict(valid_val)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the model. </span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>SINGLE_MODEL_PATH <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"single_xgb_model_pooled_3_cities.pkl"</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>joblib.dump(xgb_single_model, SINGLE_MODEL_PATH)</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model's metrics and print them. </span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>single_model_metrics <span class="op">=</span> obtain_model_metrics(</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    preds_single_xgb,</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    valid_val_labels</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(single_model_metrics)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>DRACULA_COLORS <span class="op">=</span> {</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">"comment"</span>: <span class="st">"#6272a4"</span>,</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">"purple"</span>: <span class="st">"#bd93f9"</span>,</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"red"</span>: <span class="st">"#ff5555"</span>,</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">"green"</span>: <span class="st">"#50fa7b"</span>,</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"yellow"</span>: <span class="st">"#f1fa8c"</span>,</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"pink"</span>: <span class="st">"#ff79c6"</span>,</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cyan"</span>: <span class="st">"#8be9fd"</span>,</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="st">"blue"</span>: <span class="st">"#44475a"</span>,</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">"orange"</span>: <span class="st">"#ffb86c"</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>plot_time_series(</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    preds_single_xgb,</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    valid_val_labels,</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"Predictions - val"</span>,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Ground truths"</span>,</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> DRACULA_COLORS[<span class="st">"purple"</span>],</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    xticks_every <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'mse': np.float64(12.73915989444686), 'rmse': np.float64(3.5691959731075094), 'mae': np.float64(1.9006091487071555), 'r2_val': 0.5057790925225827}</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="training_pooled_model_files/figure-html/cell-9-output-2.png" width="1047" height="471" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>(&lt;Figure size 1056x480 with 1 Axes&gt;,
+ &lt;Axes: xlabel='Predictions - val', ylabel='Ground truths'&gt;)</code></pre>
+</div>
+</div>
+</section>
+<section id="training-the-footprint-based-model" class="level3">
+<h3 class="anchored" data-anchor-id="training-the-footprint-based-model">Training the footprint-based model</h3>
+<div id="c6255866" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Indices that correspond to footprint features.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>indices_footprints <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(all_features)) <span class="cf">if</span> all_features[i] <span class="kw">in</span> FOOTPRINT_FEATURES]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Reduce the dims of the data. </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>footprint_data <span class="op">=</span> normalized_all_data[:, indices_footprints]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the train/val split. </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> train_split(</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> footprint_data,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> all_labels,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    train_percentage <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    random_state <span class="op">=</span> RANDOM_STATE</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Keep only the vectors where all the entries are finite.</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>mask_train <span class="op">=</span> np.isfinite(results[<span class="st">"x_train"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>mask_val <span class="op">=</span> np.isfinite(results[<span class="st">"x_val"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>valid_train <span class="op">=</span> results[<span class="st">"x_train"</span>][mask_train]</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>valid_train_labels <span class="op">=</span> results[<span class="st">"y_train"</span>][mask_train]</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>valid_val <span class="op">=</span> results[<span class="st">"x_val"</span>][mask_val]</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>valid_val_labels <span class="op">=</span> results[<span class="st">"y_val"</span>][mask_val]</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>valid_train_indices <span class="op">=</span> results[<span class="st">"indices_train"</span>][mask_train]</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>valid_val_indices <span class="op">=</span> np.array(results[<span class="st">"indices_val"</span>])[mask_val]</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the footprint-based model. </span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS, early_stopping_rounds<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model.fit(valid_train, valid_train_labels, eval_set<span class="op">=</span>[(valid_val, valid_val_labels)], verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>preds_footprint_xgb <span class="op">=</span> xgb_footprint_model.predict(valid_val)</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the model. </span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>FOOTPRINT_MODEL_PATH <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"footprint_xgb_model_pooled_3_cities.pkl"</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>joblib.dump(xgb_footprint_model, FOOTPRINT_MODEL_PATH)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model's metrics and print them. </span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>footprint_model_metrics <span class="op">=</span> obtain_model_metrics(</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    valid_val_labels</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(footprint_model_metrics)</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>plot_time_series(</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    valid_val_labels,</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"Predictions - val"</span>,</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Ground truths"</span>,</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"purple"</span>,</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    xticks_every <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'mse': np.float64(14.987439790207185), 'rmse': np.float64(3.871361490510436), 'mae': np.float64(2.1366179453912855), 'r2_val': 0.4139251893080207}</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="training_pooled_model_files/figure-html/cell-10-output-2.png" width="1047" height="471" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>(&lt;Figure size 1056x480 with 1 Axes&gt;,
+ &lt;Axes: xlabel='Predictions - val', ylabel='Ground truths'&gt;)</code></pre>
+</div>
+</div>
+<section id="comparison-of-models-over-multiple-seeds" class="level4">
+<h4 class="anchored" data-anchor-id="comparison-of-models-over-multiple-seeds">Comparison of models over multiple seeds</h4>
+<div id="eb9b983b" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Let's compare over multiple seeds</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>clustering_indices <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="bu">len</span>(all_features) <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>SEEDS <span class="op">=</span> <span class="bu">range</span>(<span class="dv">20</span>, <span class="dv">50</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>result_dictionaries <span class="op">=</span> []</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seed <span class="kw">in</span> SEEDS:</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    split_results <span class="op">=</span> train_split(normalized_all_data, all_labels, train_percentage<span class="op">=</span><span class="fl">0.8</span>, random_state<span class="op">=</span>seed)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    split_results_footprint <span class="op">=</span> train_split(footprint_data, all_labels, train_percentage<span class="op">=</span><span class="fl">0.8</span>, random_state<span class="op">=</span>seed)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    mask_train <span class="op">=</span> np.isfinite(split_results[<span class="st">"x_train"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    mask_val <span class="op">=</span> np.isfinite(split_results[<span class="st">"x_val"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    x_train_clean <span class="op">=</span> split_results[<span class="st">"x_train"</span>][mask_train]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    y_train_clean <span class="op">=</span> split_results[<span class="st">"y_train"</span>][mask_train]</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    x_val_clean <span class="op">=</span> split_results[<span class="st">"x_val"</span>][mask_val]</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    y_val_clean <span class="op">=</span> split_results[<span class="st">"y_val"</span>][mask_val]</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    mask_train_footprint <span class="op">=</span> np.isfinite(split_results_footprint[<span class="st">"x_train"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    mask_val_footprint <span class="op">=</span> np.isfinite(split_results_footprint[<span class="st">"x_val"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    x_train_footprint_clean <span class="op">=</span> split_results_footprint[<span class="st">"x_train"</span>][mask_train_footprint]</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    y_train_footprint_clean <span class="op">=</span> split_results_footprint[<span class="st">"y_train"</span>][mask_train_footprint]</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    x_val_footprint_clean <span class="op">=</span> split_results_footprint[<span class="st">"x_val"</span>][mask_val_footprint]</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    y_val_footprint_clean <span class="op">=</span> split_results_footprint[<span class="st">"y_val"</span>][mask_val_footprint]</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    best_k <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    rmse <span class="op">=</span> <span class="bu">float</span>(<span class="st">"Inf"</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    k_curve <span class="op">=</span> {}</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    size_curve <span class="op">=</span> {}</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    inner <span class="op">=</span> train_split(x_train_clean, y_train_clean, train_percentage<span class="op">=</span><span class="fl">0.8</span>, random_state<span class="op">=</span>seed)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> tqdm(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">14</span>)):</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>         m <span class="op">=</span> ClusterWeightedEnsembleWrapper(</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>            n_clusters<span class="op">=</span>k,</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>            model_factory<span class="op">=</span>choose_model_for_cluster_xgb,</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>            kmeans_kwargs<span class="op">=</span>{<span class="st">"n_init"</span>: <span class="dv">10</span>, <span class="st">"random_state"</span>: RANDOM_STATE},</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            feature_indices_used_for_clustering<span class="op">=</span>clustering_indices,</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>            decay_constant<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>            outside_weight_tau<span class="op">=</span><span class="dv">170</span>)</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>         m.fit(inner[<span class="st">"x_train"</span>], inner[<span class="st">"y_train"</span>])</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>         predictions <span class="op">=</span> m.predict(inner[<span class="st">"x_val"</span>])</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>         metrics <span class="op">=</span> obtain_model_metrics(predictions, inner[<span class="st">"y_val"</span>])</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>         k_curve[k] <span class="op">=</span> metrics[<span class="st">"rmse"</span>]</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>         size_curve[k] <span class="op">=</span> <span class="bu">int</span>(np.bincount(m._kmeans.labels_, minlength<span class="op">=</span>k).<span class="bu">min</span>())</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>         <span class="cf">if</span>(metrics[<span class="st">"rmse"</span>]<span class="op">&lt;</span>rmse):</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>              rmse <span class="op">=</span> metrics[<span class="st">"rmse"</span>]</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>              best_k <span class="op">=</span> k</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    results_dictionary <span class="op">=</span> {}</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> ClusterWeightedEnsembleWrapper(</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>            n_clusters<span class="op">=</span>best_k,</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>            model_factory<span class="op">=</span>choose_model_for_cluster_xgb,</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>            kmeans_kwargs<span class="op">=</span>{<span class="st">"n_init"</span>: <span class="dv">10</span>, <span class="st">"random_state"</span>: RANDOM_STATE},</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>            feature_indices_used_for_clustering<span class="op">=</span>clustering_indices,</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>            decay_constant<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>            outside_weight_tau<span class="op">=</span><span class="dv">170</span>)</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    model.fit(x_train_clean, y_train_clean)</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> model.predict(x_val_clean)</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    metrics <span class="op">=</span> obtain_model_metrics(predictions, y_val_clean)</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"cluster_then_predict_rmse"</span>] <span class="op">=</span> metrics[<span class="st">"rmse"</span>]</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>    xgb_model <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS)</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>    xgb_model.fit(x_train_clean, y_train_clean)</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    rmse_xgb <span class="op">=</span> compute_rmse(xgb_model.predict(x_val_clean), y_val_clean)</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"universal_model_rmse"</span>] <span class="op">=</span> rmse_xgb</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>    xgb_model_footprint <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS)</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    xgb_model_footprint.fit(x_train_footprint_clean, y_train_footprint_clean)</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    rmse_xgb_footprint <span class="op">=</span> compute_rmse(xgb_model_footprint.predict(x_val_footprint_clean), y_val_footprint_clean)</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"footprint_model_rmse"</span>] <span class="op">=</span> rmse_xgb_footprint</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"best_k"</span>] <span class="op">=</span> best_k</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"k_curve"</span>] <span class="op">=</span> k_curve</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>    results_dictionary[<span class="st">"min_cluster_size"</span>] <span class="op">=</span> size_curve</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>    result_dictionaries.append(results_dictionary)</span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(results_dictionary)</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a><span class="co">#In the end we export</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"results_universal_vs_cluster_pooled_3_cities.json"</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the data.</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>path.parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>    json.dump(result_dictionaries, f, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved to"</span>, path)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.646103588375852), 'universal_model_rmse': np.float64(3.6999628226725294), 'footprint_model_rmse': np.float64(3.8595523028379337), 'best_k': 3, 'k_curve': {2: np.float64(4.486652921475095), 3: np.float64(4.458960914120532), 4: np.float64(4.484870261318663), 5: np.float64(4.46529725833709), 6: np.float64(4.4595219191845725), 7: np.float64(4.471713317115061), 8: np.float64(4.460001874759305), 9: np.float64(4.479165878126061), 10: np.float64(4.490905362101385), 11: np.float64(4.48142496893847), 12: np.float64(4.500280713466479), 13: np.float64(4.506071767265253)}, 'min_cluster_size': {2: 1774, 3: 1181, 4: 1089, 5: 194, 6: 181, 7: 16, 8: 16, 9: 16, 10: 16, 11: 22, 12: 16, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.214135911778396), 'universal_model_rmse': np.float64(3.368087576528184), 'footprint_model_rmse': np.float64(3.7444859677466553), 'best_k': 10, 'k_curve': {2: np.float64(3.7664600183490413), 3: np.float64(3.6833428289146513), 4: np.float64(3.664886697914128), 5: np.float64(3.685215512702755), 6: np.float64(3.670958781019965), 7: np.float64(3.6720529329296285), 8: np.float64(3.65449635267208), 9: np.float64(3.682206240219666), 10: np.float64(3.6481059512415595), 11: np.float64(3.6552526642181147), 12: np.float64(3.6609501644785176), 13: np.float64(3.663659090894997)}, 'min_cluster_size': {2: 1715, 3: 1174, 4: 185, 5: 164, 6: 159, 7: 17, 8: 20, 9: 20, 10: 16, 11: 28, 12: 16, 13: 20}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.812030786395248), 'universal_model_rmse': np.float64(3.922482554056785), 'footprint_model_rmse': np.float64(4.2967774070959255), 'best_k': 7, 'k_curve': {2: np.float64(4.409344385725321), 3: np.float64(4.336765911076267), 4: np.float64(4.219911227218638), 5: np.float64(4.147625531135106), 6: np.float64(4.144734374060071), 7: np.float64(4.135637088790403), 8: np.float64(4.15061743020581), 9: np.float64(4.173520384347531), 10: np.float64(4.171571668827506), 11: np.float64(4.151314748779477), 12: np.float64(4.145733200161418), 13: np.float64(4.163682230267002)}, 'min_cluster_size': {2: 1756, 3: 1226, 4: 964, 5: 204, 6: 195, 7: 205, 8: 19, 9: 19, 10: 19, 11: 36, 12: 19, 13: 36}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.240359180090953), 'universal_model_rmse': np.float64(4.3261713282007115), 'footprint_model_rmse': np.float64(4.832176039034388), 'best_k': 11, 'k_curve': {2: np.float64(4.061233874408119), 3: np.float64(4.034803237716355), 4: np.float64(4.047685189507294), 5: np.float64(4.055066521943006), 6: np.float64(4.047151591179634), 7: np.float64(4.032828430707299), 8: np.float64(4.026157503100275), 9: np.float64(4.020234779946583), 10: np.float64(4.021799585550973), 11: np.float64(4.006918469139204), 12: np.float64(4.018677950175279), 13: np.float64(4.018842648270269)}, 'min_cluster_size': {2: 1547, 3: 1093, 4: 147, 5: 146, 6: 146, 7: 35, 8: 47, 9: 18, 10: 14, 11: 14, 12: 18, 13: 14}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.057203310289056), 'universal_model_rmse': np.float64(4.164656599682605), 'footprint_model_rmse': np.float64(4.403595442625357), 'best_k': 12, 'k_curve': {2: np.float64(5.312457699112122), 3: np.float64(5.267766042359175), 4: np.float64(5.248064165386624), 5: np.float64(5.244667709997723), 6: np.float64(5.246771048265742), 7: np.float64(5.242253833067642), 8: np.float64(5.245736283449294), 9: np.float64(5.234608720359231), 10: np.float64(5.234927008450708), 11: np.float64(5.237267832397752), 12: np.float64(5.231656306986874), 13: np.float64(5.231695101996372)}, 'min_cluster_size': {2: 1522, 3: 956, 4: 151, 5: 145, 6: 143, 7: 33, 8: 15, 9: 15, 10: 15, 11: 15, 12: 15, 13: 15}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.1768483644041865), 'universal_model_rmse': np.float64(3.2747170977528395), 'footprint_model_rmse': np.float64(3.5538293271266257), 'best_k': 6, 'k_curve': {2: np.float64(3.0477585078469955), 3: np.float64(3.034409734056243), 4: np.float64(3.0267702421211604), 5: np.float64(3.0210281970720074), 6: np.float64(3.0197133526741347), 7: np.float64(3.077026003095671), 8: np.float64(3.0963119239509846), 9: np.float64(3.1089431203534126), 10: np.float64(3.100499181916447), 11: np.float64(3.096799529936822), 12: np.float64(3.106296525360528), 13: np.float64(3.1153544779162)}, 'min_cluster_size': {2: 1749, 3: 1203, 4: 1025, 5: 233, 6: 216, 7: 188, 8: 187, 9: 36, 10: 36, 11: 36, 12: 35, 13: 25}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.3088967764947395), 'universal_model_rmse': np.float64(4.418199374992828), 'footprint_model_rmse': np.float64(4.497313283979234), 'best_k': 8, 'k_curve': {2: np.float64(3.912793912225057), 3: np.float64(3.9190723113987214), 4: np.float64(3.9072619873334533), 5: np.float64(3.892218651034543), 6: np.float64(3.886716427523688), 7: np.float64(3.897989863509328), 8: np.float64(3.872537567117969), 9: np.float64(3.8767244455175405), 10: np.float64(3.884783143977648), 11: np.float64(3.890762175374079), 12: np.float64(3.9027753402221737), 13: np.float64(3.8755903489296686)}, 'min_cluster_size': {2: 1669, 3: 1156, 4: 194, 5: 164, 6: 80, 7: 80, 8: 51, 9: 21, 10: 21, 11: 38, 12: 27, 13: 21}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.863463363525986), 'universal_model_rmse': np.float64(4.958710351861184), 'footprint_model_rmse': np.float64(5.134118902439876), 'best_k': 8, 'k_curve': {2: np.float64(4.5988606628926), 3: np.float64(4.585563775274363), 4: np.float64(4.551625246781917), 5: np.float64(4.526344994098018), 6: np.float64(4.523597460881187), 7: np.float64(4.539641764598544), 8: np.float64(4.505678427249188), 9: np.float64(4.5219450108980155), 10: np.float64(4.510201006534983), 11: np.float64(4.525213884136615), 12: np.float64(4.51141688156447), 13: np.float64(4.510314506076016)}, 'min_cluster_size': {2: 2031, 3: 1199, 4: 1072, 5: 202, 6: 200, 7: 199, 8: 196, 9: 43, 10: 16, 11: 16, 12: 16, 13: 12}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.480672250826611), 'universal_model_rmse': np.float64(3.5271384004202453), 'footprint_model_rmse': np.float64(4.079278354867095), 'best_k': 10, 'k_curve': {2: np.float64(4.047442695101341), 3: np.float64(4.043193571620066), 4: np.float64(4.065045754466038), 5: np.float64(4.081719334832458), 6: np.float64(4.063804343829222), 7: np.float64(4.040465771071962), 8: np.float64(4.04780614961544), 9: np.float64(4.061829650622571), 10: np.float64(4.024313423687836), 11: np.float64(4.064219013291144), 12: np.float64(4.061262556220714), 13: np.float64(4.072381305710101)}, 'min_cluster_size': {2: 1482, 3: 983, 4: 117, 5: 104, 6: 89, 7: 32, 8: 14, 9: 33, 10: 14, 11: 14, 12: 14, 13: 14}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.9963424265359606), 'universal_model_rmse': np.float64(4.145625274733587), 'footprint_model_rmse': np.float64(4.2348920776765775), 'best_k': 2, 'k_curve': {2: np.float64(3.295819225332822), 3: np.float64(3.3278174129142455), 4: np.float64(3.343013474446066), 5: np.float64(3.332303440300619), 6: np.float64(3.323786500707972), 7: np.float64(3.3116972364094925), 8: np.float64(3.339685218779003), 9: np.float64(3.3290801597119426), 10: np.float64(3.33382978905409), 11: np.float64(3.3548064534163857), 12: np.float64(3.338429281432968), 13: np.float64(3.35058704790048)}, 'min_cluster_size': {2: 1633, 3: 1007, 4: 757, 5: 103, 6: 104, 7: 47, 8: 46, 9: 16, 10: 46, 11: 33, 12: 16, 13: 38}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.7143563756178), 'universal_model_rmse': np.float64(4.717396402585783), 'footprint_model_rmse': np.float64(4.9425412227480185), 'best_k': 7, 'k_curve': {2: np.float64(4.3665839368064505), 3: np.float64(4.3586907828571135), 4: np.float64(4.354187909047492), 5: np.float64(4.359966096109875), 6: np.float64(4.338288025396399), 7: np.float64(4.333933617041762), 8: np.float64(4.359293816613436), 9: np.float64(4.35401151003817), 10: np.float64(4.351828709448559), 11: np.float64(4.345901818840043), 12: np.float64(4.340369341470432), 13: np.float64(4.34551387491077)}, 'min_cluster_size': {2: 1681, 3: 1092, 4: 966, 5: 184, 6: 180, 7: 20, 8: 16, 9: 15, 10: 20, 11: 15, 12: 15, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.9253335962422273), 'universal_model_rmse': np.float64(4.072457092021928), 'footprint_model_rmse': np.float64(4.4321055348217175), 'best_k': 4, 'k_curve': {2: np.float64(4.09021552912571), 3: np.float64(4.061069197909978), 4: np.float64(4.042796550484763), 5: np.float64(4.070932714036445), 6: np.float64(4.110875463046423), 7: np.float64(4.089046020847046), 8: np.float64(4.117375565167211), 9: np.float64(4.125985068445461), 10: np.float64(4.167003557961041), 11: np.float64(4.155033733039748), 12: np.float64(4.159371912766975), 13: np.float64(4.176839744596505)}, 'min_cluster_size': {2: 1829, 3: 1187, 4: 1081, 5: 153, 6: 149, 7: 20, 8: 130, 9: 43, 10: 40, 11: 20, 12: 20, 13: 20}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.5389821344037444), 'universal_model_rmse': np.float64(3.627294545155413), 'footprint_model_rmse': np.float64(4.094380398424163), 'best_k': 12, 'k_curve': {2: np.float64(4.910956235747198), 3: np.float64(4.925727683129209), 4: np.float64(4.8926545906750745), 5: np.float64(4.8801795272939845), 6: np.float64(4.873410712011053), 7: np.float64(4.8678861128402495), 8: np.float64(4.8620985905779355), 9: np.float64(4.852146495009692), 10: np.float64(4.841094770495094), 11: np.float64(4.8497081718809065), 12: np.float64(4.837973442198633), 13: np.float64(4.851025607688795)}, 'min_cluster_size': {2: 1491, 3: 1019, 4: 186, 5: 129, 6: 123, 7: 16, 8: 111, 9: 19, 10: 45, 11: 16, 12: 19, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.235200973524801), 'universal_model_rmse': np.float64(4.310873942194015), 'footprint_model_rmse': np.float64(4.616942194692877), 'best_k': 4, 'k_curve': {2: np.float64(3.1587235110434024), 3: np.float64(3.1555540711654704), 4: np.float64(3.1212414263610917), 5: np.float64(3.146065872827714), 6: np.float64(3.1502463308234603), 7: np.float64(3.160394237274715), 8: np.float64(3.1639980001332817), 9: np.float64(3.1777429397990553), 10: np.float64(3.179316459135651), 11: np.float64(3.175880852835444), 12: np.float64(3.186693484151492), 13: np.float64(3.1796802843802894)}, 'min_cluster_size': {2: 1695, 3: 1188, 4: 987, 5: 155, 6: 126, 7: 153, 8: 40, 9: 35, 10: 11, 11: 11, 12: 11, 13: 11}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.894995804773116), 'universal_model_rmse': np.float64(3.9745960181551587), 'footprint_model_rmse': np.float64(4.4319300007670765), 'best_k': 12, 'k_curve': {2: np.float64(4.600480653120089), 3: np.float64(4.626160168937278), 4: np.float64(4.600661255719157), 5: np.float64(4.5970352756442505), 6: np.float64(4.614136696881733), 7: np.float64(4.608571127887636), 8: np.float64(4.601434990090092), 9: np.float64(4.6020284270093255), 10: np.float64(4.601094401464927), 11: np.float64(4.621261570674316), 12: np.float64(4.592993447227814), 13: np.float64(4.596713009203152)}, 'min_cluster_size': {2: 1665, 3: 1135, 4: 955, 5: 234, 6: 234, 7: 235, 8: 14, 9: 14, 10: 14, 11: 14, 12: 14, 13: 14}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.275661414987357), 'universal_model_rmse': np.float64(3.450592935982703), 'footprint_model_rmse': np.float64(3.699571681797962), 'best_k': 6, 'k_curve': {2: np.float64(3.251519926172812), 3: np.float64(3.197106547978838), 4: np.float64(3.2185688711157097), 5: np.float64(3.1963053980632896), 6: np.float64(3.1933236376174974), 7: np.float64(3.2120322343970282), 8: np.float64(3.2205820832539604), 9: np.float64(3.226242759139519), 10: np.float64(3.242729782059675), 11: np.float64(3.2417095557775952), 12: np.float64(3.2503753892444793), 13: np.float64(3.2455327996493333)}, 'min_cluster_size': {2: 1662, 3: 1114, 4: 1000, 5: 233, 6: 232, 7: 230, 8: 200, 9: 48, 10: 48, 11: 16, 12: 16, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.9800003881198944), 'universal_model_rmse': np.float64(3.9596099374006792), 'footprint_model_rmse': np.float64(4.34888118029861), 'best_k': 3, 'k_curve': {2: np.float64(3.124858854157581), 3: np.float64(3.011931207503654), 4: np.float64(3.0884628951067685), 5: np.float64(3.089192307408149), 6: np.float64(3.0626426202051817), 7: np.float64(3.065108538600324), 8: np.float64(3.11124980379235), 9: np.float64(3.1002683852555877), 10: np.float64(3.089390970775436), 11: np.float64(3.100702349542441), 12: np.float64(3.091533656837994), 13: np.float64(3.101238739341281)}, 'min_cluster_size': {2: 1781, 3: 1192, 4: 215, 5: 162, 6: 161, 7: 20, 8: 16, 9: 20, 10: 16, 11: 20, 12: 17, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.470911708838809), 'universal_model_rmse': np.float64(4.523215845467747), 'footprint_model_rmse': np.float64(4.690069767608432), 'best_k': 7, 'k_curve': {2: np.float64(3.9626057043255583), 3: np.float64(3.96252820122175), 4: np.float64(3.9619514113736667), 5: np.float64(3.9626899081806775), 6: np.float64(3.963641328016652), 7: np.float64(3.955000126381039), 8: np.float64(3.956382301993321), 9: np.float64(3.9685815176961072), 10: np.float64(3.964616297967073), 11: np.float64(3.978603131987005), 12: np.float64(3.968796391637476), 13: np.float64(3.9706992142530173)}, 'min_cluster_size': {2: 1651, 3: 1159, 4: 998, 5: 225, 6: 220, 7: 203, 8: 202, 9: 12, 10: 12, 11: 12, 12: 12, 13: 12}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.201317221211714), 'universal_model_rmse': np.float64(4.277845581124414), 'footprint_model_rmse': np.float64(4.498367490932246), 'best_k': 4, 'k_curve': {2: np.float64(3.365414164854175), 3: np.float64(3.373926340704583), 4: np.float64(3.3087212371377164), 5: np.float64(3.3530938967666093), 6: np.float64(3.3522259119406987), 7: np.float64(3.324564187229986), 8: np.float64(3.3515409202034583), 9: np.float64(3.3374448564848205), 10: np.float64(3.333336066810219), 11: np.float64(3.3368211048829486), 12: np.float64(3.3497276719616464), 13: np.float64(3.3435409515476997)}, 'min_cluster_size': {2: 1510, 3: 960, 4: 181, 5: 139, 6: 121, 7: 43, 8: 19, 9: 14, 10: 14, 11: 14, 12: 19, 13: 15}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.464881995116174), 'universal_model_rmse': np.float64(3.6776563257035373), 'footprint_model_rmse': np.float64(3.957254499399923), 'best_k': 6, 'k_curve': {2: np.float64(3.5025649190054766), 3: np.float64(3.5301823315834997), 4: np.float64(3.511945786479215), 5: np.float64(3.512975394888484), 6: np.float64(3.486185704379484), 7: np.float64(3.493898503867388), 8: np.float64(3.4920956210962637), 9: np.float64(3.5039334671182383), 10: np.float64(3.4975731636757565), 11: np.float64(3.526171318275101), 12: np.float64(3.503690957092493), 13: np.float64(3.5206046689412465)}, 'min_cluster_size': {2: 1697, 3: 1158, 4: 941, 5: 222, 6: 240, 7: 219, 8: 19, 9: 19, 10: 19, 11: 19, 12: 19, 13: 19}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.488167860856189), 'universal_model_rmse': np.float64(4.537109182362012), 'footprint_model_rmse': np.float64(4.855460831528316), 'best_k': 8, 'k_curve': {2: np.float64(4.359561047617788), 3: np.float64(4.351666310726557), 4: np.float64(4.349720659053711), 5: np.float64(4.340684921147164), 6: np.float64(4.339665676102726), 7: np.float64(4.342145932354676), 8: np.float64(4.337636502985954), 9: np.float64(4.342129073118807), 10: np.float64(4.3412404748692754), 11: np.float64(4.350340212650038), 12: np.float64(4.341296985202248), 13: np.float64(4.344612750543294)}, 'min_cluster_size': {2: 1905, 3: 1276, 4: 1125, 5: 191, 6: 189, 7: 19, 8: 15, 9: 15, 10: 15, 11: 16, 12: 15, 13: 19}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.310124166657623), 'universal_model_rmse': np.float64(4.380364442012385), 'footprint_model_rmse': np.float64(4.684922097911137), 'best_k': 4, 'k_curve': {2: np.float64(3.6141145629913862), 3: np.float64(3.5749626062677433), 4: np.float64(3.5432934034980725), 5: np.float64(3.5467365171526226), 6: np.float64(3.550110875356591), 7: np.float64(3.5474759962021056), 8: np.float64(3.5682337574256224), 9: np.float64(3.5695922999647633), 10: np.float64(3.5929524502474406), 11: np.float64(3.593564850703345), 12: np.float64(3.5957743281628827), 13: np.float64(3.6027946513969624)}, 'min_cluster_size': {2: 1654, 3: 1046, 4: 943, 5: 197, 6: 176, 7: 17, 8: 16, 9: 17, 10: 16, 11: 20, 12: 16, 13: 16}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.1513663161618357), 'universal_model_rmse': np.float64(3.5357600608593986), 'footprint_model_rmse': np.float64(3.589161753912366), 'best_k': 2, 'k_curve': {2: np.float64(4.874826380660442), 3: np.float64(4.8885711182177705), 4: np.float64(4.896953014884445), 5: np.float64(4.919848805796266), 6: np.float64(4.8771831673203865), 7: np.float64(4.900669364071264), 8: np.float64(4.913578539308549), 9: np.float64(4.909279577535121), 10: np.float64(4.904537754287168), 11: np.float64(4.915183540660672), 12: np.float64(4.916647934270583), 13: np.float64(4.915509937773908)}, 'min_cluster_size': {2: 1705, 3: 998, 4: 958, 5: 192, 6: 192, 7: 17, 8: 41, 9: 12, 10: 12, 11: 12, 12: 12, 13: 12}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.403360093343509), 'universal_model_rmse': np.float64(4.478654220027025), 'footprint_model_rmse': np.float64(4.603513163236283), 'best_k': 13, 'k_curve': {2: np.float64(3.6248214070777136), 3: np.float64(3.5536623809890044), 4: np.float64(3.5598559405954484), 5: np.float64(3.501627528082646), 6: np.float64(3.500953450687276), 7: np.float64(3.514770876543927), 8: np.float64(3.5026503862592016), 9: np.float64(3.495244972619414), 10: np.float64(3.482699174513326), 11: np.float64(3.4828060535629954), 12: np.float64(3.489881022159807), 13: np.float64(3.4806566963879764)}, 'min_cluster_size': {2: 1569, 3: 979, 4: 302, 5: 227, 6: 226, 7: 13, 8: 17, 9: 13, 10: 17, 11: 17, 12: 17, 13: 13}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.653659056023322), 'universal_model_rmse': np.float64(3.734273394892773), 'footprint_model_rmse': np.float64(4.158153772145993), 'best_k': 8, 'k_curve': {2: np.float64(2.92194462101601), 3: np.float64(2.9496676290904973), 4: np.float64(2.917504085763042), 5: np.float64(2.902254288003976), 6: np.float64(2.9005649081555105), 7: np.float64(2.9017090381707753), 8: np.float64(2.8939242614791616), 9: np.float64(2.9039253390613613), 10: np.float64(2.908094629863114), 11: np.float64(2.9286949229931643), 12: np.float64(2.9270340033740667), 13: np.float64(2.932129640378247)}, 'min_cluster_size': {2: 1781, 3: 1304, 4: 1072, 5: 199, 6: 198, 7: 17, 8: 177, 9: 17, 10: 17, 11: 22, 12: 17, 13: 22}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.222975950605219), 'universal_model_rmse': np.float64(4.276983198894884), 'footprint_model_rmse': np.float64(4.497625212122672), 'best_k': 2, 'k_curve': {2: np.float64(4.129613952026589), 3: np.float64(4.1321784489324855), 4: np.float64(4.141269124997665), 5: np.float64(4.193335645458571), 6: np.float64(4.186052674780756), 7: np.float64(4.187661223969099), 8: np.float64(4.178142524856339), 9: np.float64(4.166447672523113), 10: np.float64(4.147874267737854), 11: np.float64(4.1511136148499235), 12: np.float64(4.165684987677297), 13: np.float64(4.168186682872636)}, 'min_cluster_size': {2: 1775, 3: 1329, 4: 1123, 5: 167, 6: 164, 7: 156, 8: 149, 9: 40, 10: 33, 11: 18, 12: 33, 13: 18}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.1559499479325765), 'universal_model_rmse': np.float64(4.233506331798413), 'footprint_model_rmse': np.float64(4.441465718015073), 'best_k': 11, 'k_curve': {2: np.float64(3.1806833994825823), 3: np.float64(3.1856566904258066), 4: np.float64(3.1382874161235392), 5: np.float64(3.154506941901457), 6: np.float64(3.1624773595872226), 7: np.float64(3.158433343936104), 8: np.float64(3.1548026951730814), 9: np.float64(3.138044723473006), 10: np.float64(3.1455022724250665), 11: np.float64(3.119448115997534), 12: np.float64(3.1286728632915226), 13: np.float64(3.1260987383600565)}, 'min_cluster_size': {2: 1779, 3: 1190, 4: 1106, 5: 99, 6: 98, 7: 99, 8: 97, 9: 12, 10: 12, 11: 12, 12: 12, 13: 12}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(3.378314387567056), 'universal_model_rmse': np.float64(3.3895587887744054), 'footprint_model_rmse': np.float64(3.8366217826194275), 'best_k': 8, 'k_curve': {2: np.float64(4.096134141950698), 3: np.float64(4.086832363852656), 4: np.float64(4.108284995776754), 5: np.float64(4.132895757762999), 6: np.float64(4.096855335951276), 7: np.float64(4.103220630098024), 8: np.float64(4.064535973577487), 9: np.float64(4.07159676650088), 10: np.float64(4.085204062794855), 11: np.float64(4.093328385721997), 12: np.float64(4.091344338182605), 13: np.float64(4.105098393212804)}, 'min_cluster_size': {2: 1385, 3: 798, 4: 125, 5: 61, 6: 61, 7: 17, 8: 17, 9: 17, 10: 16, 11: 17, 12: 17, 13: 17}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.6532995467011515), 'universal_model_rmse': np.float64(4.733561313989352), 'footprint_model_rmse': np.float64(4.9995246484530105), 'best_k': 8, 'k_curve': {2: np.float64(3.779645324258016), 3: np.float64(3.737979042030491), 4: np.float64(3.749541534545168), 5: np.float64(3.7385780401493074), 6: np.float64(3.732591914290867), 7: np.float64(3.727320525801571), 8: np.float64(3.7088871911190453), 9: np.float64(3.73433483412961), 10: np.float64(3.729261929086313), 11: np.float64(3.7208062023915542), 12: np.float64(3.7311821107376537), 13: np.float64(3.737433787797314)}, 'min_cluster_size': {2: 1540, 3: 1103, 4: 231, 5: 185, 6: 184, 7: 185, 8: 46, 9: 45, 10: 45, 11: 18, 12: 29, 13: 29}}</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'cluster_then_predict_rmse': np.float64(4.5938028429501045), 'universal_model_rmse': np.float64(4.569892573364552), 'footprint_model_rmse': np.float64(4.958758263836638), 'best_k': 6, 'k_curve': {2: np.float64(4.004386175846129), 3: np.float64(3.9983327080090914), 4: np.float64(4.001283067497266), 5: np.float64(3.9583894939303437), 6: np.float64(3.945341395114582), 7: np.float64(3.9627829964401786), 8: np.float64(3.9556821594622837), 9: np.float64(3.9678603228742344), 10: np.float64(3.961268047272383), 11: np.float64(3.983415032602977), 12: np.float64(3.9839070702159063), 13: np.float64(3.979669155668844)}, 'min_cluster_size': {2: 1646, 3: 999, 4: 140, 5: 188, 6: 176, 7: 45, 8: 15, 9: 19, 10: 16, 11: 16, 12: 19, 13: 15}}
+Saved to /Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/results_universal_vs_cluster_pooled_3_cities.json</code></pre>
+</div>
+</div>
+</section>
+<section id="choosing-k-for-the-cluster-then-predict-model" class="level4">
+<h4 class="anchored" data-anchor-id="choosing-k-for-the-cluster-then-predict-model">Choosing K for the cluster-then-predict model</h4>
+<div id="3603eda6" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>MIN_CLUSTER_SIZE <span class="op">=</span> <span class="dv">25</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Smallest k below the size cut with a cluster that captures the buildings with high vegetation</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>K_CHOSEN <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>k_grid <span class="op">=</span> <span class="bu">sorted</span>(result_dictionaries[<span class="dv">0</span>][<span class="st">"k_curve"</span>].keys())</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>curves <span class="op">=</span> np.array([[d[<span class="st">"k_curve"</span>][k] <span class="cf">for</span> k <span class="kw">in</span> k_grid] <span class="cf">for</span> d <span class="kw">in</span> result_dictionaries])</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>sizes <span class="op">=</span> np.array([[d[<span class="st">"min_cluster_size"</span>][k] <span class="cf">for</span> k <span class="kw">in</span> k_grid] <span class="cf">for</span> d <span class="kw">in</span> result_dictionaries])</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>mean_curve <span class="op">=</span> curves.mean(axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>se_curve <span class="op">=</span> curves.std(axis <span class="op">=</span> <span class="dv">0</span>, ddof <span class="op">=</span> <span class="dv">1</span>)<span class="op">/</span>np.sqrt(<span class="bu">len</span>(curves))</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>worst_size <span class="op">=</span> sizes.<span class="bu">min</span>(axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>too_small <span class="op">=</span> [k_grid[i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(k_grid)) <span class="cf">if</span> worst_size[i] <span class="op">&lt;</span> MIN_CLUSTER_SIZE]</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>k_cut <span class="op">=</span> too_small[<span class="dv">0</span>] <span class="cf">if</span> <span class="bu">len</span>(too_small) <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> k_cut <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> K_CHOSEN <span class="op">&lt;</span> k_cut</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Seeds averaged: </span><span class="sc">{</span><span class="bu">len</span>(curves)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Smallest group falls below </span><span class="sc">{</span>MIN_CLUSTER_SIZE<span class="sc">}</span><span class="ss"> at k = </span><span class="sc">{</span>k_cut<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"k chosen: </span><span class="sc">{</span>K_CHOSEN<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, k <span class="kw">in</span> <span class="bu">enumerate</span>(k_grid):</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>    mark <span class="op">=</span> <span class="st">"   &lt;-- chosen"</span> <span class="cf">if</span> k <span class="op">==</span> K_CHOSEN <span class="cf">else</span> <span class="st">""</span></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"   k = </span><span class="sc">{</span>k<span class="sc">:&gt;2}</span><span class="ss">   mean held-out RMSE </span><span class="sc">{</span>mean_curve[i]<span class="sc">:.4f}</span><span class="ss"> +/- </span><span class="sc">{</span>se_curve[i]<span class="sc">:.4f}</span><span class="ss">"</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f"   smallest group </span><span class="sc">{</span>worst_size[i]<span class="sc">:&gt;5}{</span>mark<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plot_time_series(</span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>    k_grid,</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a>    mean_curve,</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"k"</span>,</span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Mean held-out RMSE"</span>,</span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a>    indexes_to_label <span class="op">=</span> [k_grid.index(K_CHOSEN)],</span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> DRACULA_COLORS[<span class="st">"green"</span>],</span>
+<span id="cb45-33"><a href="#cb45-33" aria-hidden="true" tabindex="-1"></a>    highlight_color <span class="op">=</span> DRACULA_COLORS[<span class="st">"orange"</span>],</span>
+<span id="cb45-34"><a href="#cb45-34" aria-hidden="true" tabindex="-1"></a>    figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">4</span>),</span>
+<span id="cb45-35"><a href="#cb45-35" aria-hidden="true" tabindex="-1"></a>    show <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb45-36"><a href="#cb45-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-37"><a href="#cb45-37" aria-hidden="true" tabindex="-1"></a>ax.errorbar(k_grid, mean_curve, yerr <span class="op">=</span> se_curve, fmt <span class="op">=</span> <span class="st">"none"</span>, ecolor <span class="op">=</span> DRACULA_COLORS[<span class="st">"green"</span>], capsize <span class="op">=</span> <span class="dv">3</span>)</span>
+<span id="cb45-38"><a href="#cb45-38" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> k_cut <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb45-39"><a href="#cb45-39" aria-hidden="true" tabindex="-1"></a>    ax.axvspan(k_cut <span class="op">-</span> <span class="fl">0.5</span>, k_grid[<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> <span class="fl">0.5</span>, color <span class="op">=</span> DRACULA_COLORS[<span class="st">"red"</span>], alpha <span class="op">=</span> <span class="fl">0.15</span>)</span>
+<span id="cb45-40"><a href="#cb45-40" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb45-41"><a href="#cb45-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-42"><a href="#cb45-42" aria-hidden="true" tabindex="-1"></a><span class="co">#Saving the averaged curve too, so the choice can be checked without re-running the sweep</span></span>
+<span id="cb45-43"><a href="#cb45-43" aria-hidden="true" tabindex="-1"></a>K_CURVE_PATH <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"k_mean_inner_curve_pooled_3_cities.json"</span></span>
+<span id="cb45-44"><a href="#cb45-44" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(K_CURVE_PATH, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb45-45"><a href="#cb45-45" aria-hidden="true" tabindex="-1"></a>    json.dump({</span>
+<span id="cb45-46"><a href="#cb45-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"k"</span>: k_grid,</span>
+<span id="cb45-47"><a href="#cb45-47" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean_rmse"</span>: mean_curve.tolist(),</span>
+<span id="cb45-48"><a href="#cb45-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">"se_rmse"</span>: se_curve.tolist(),</span>
+<span id="cb45-49"><a href="#cb45-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"smallest_group"</span>: worst_size.tolist(),</span>
+<span id="cb45-50"><a href="#cb45-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"per_seed_best_k"</span>: [d[<span class="st">"best_k"</span>] <span class="cf">for</span> d <span class="kw">in</span> result_dictionaries],</span>
+<span id="cb45-51"><a href="#cb45-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"min_cluster_size"</span>: MIN_CLUSTER_SIZE,</span>
+<span id="cb45-52"><a href="#cb45-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"k_cut"</span>: k_cut,</span>
+<span id="cb45-53"><a href="#cb45-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"k_chosen"</span>: K_CHOSEN,</span>
+<span id="cb45-54"><a href="#cb45-54" aria-hidden="true" tabindex="-1"></a>    }, f, indent <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb45-55"><a href="#cb45-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-56"><a href="#cb45-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Saved to"</span>, K_CURVE_PATH)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Seeds averaged: 30
+Smallest group falls below 25 at k = 7
+k chosen: 6
+
+   k =  2   mean held-out RMSE 3.9286 +/- 0.1120   smallest group  1385
+   k =  3   mean held-out RMSE 3.9118 +/- 0.1125   smallest group   798
+   k =  4   mean held-out RMSE 3.9022 +/- 0.1120   smallest group   117
+   k =  5   mean held-out RMSE 3.9003 +/- 0.1118   smallest group    61
+   k =  6   mean held-out RMSE 3.8941 +/- 0.1116   smallest group    61   &lt;-- chosen
+   k =  7   mean held-out RMSE 3.8959 +/- 0.1112   smallest group    13
+   k =  8   mean held-out RMSE 3.8971 +/- 0.1103   smallest group    14
+   k =  9   mean held-out RMSE 3.9012 +/- 0.1102   smallest group    12
+   k = 10   mean held-out RMSE 3.8996 +/- 0.1100   smallest group    11
+   k = 11   mean held-out RMSE 3.9045 +/- 0.1102   smallest group    11
+   k = 12   mean held-out RMSE 3.9043 +/- 0.1096   smallest group    11
+   k = 13   mean held-out RMSE 3.9077 +/- 0.1098   smallest group    11</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="training_pooled_model_files/figure-html/cell-12-output-2.png" width="942" height="374" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Saved to /Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/k_mean_inner_curve_pooled_3_cities.json</code></pre>
+</div>
+</div>
+</section>
+<section id="training-the-ctp" class="level4">
+<h4 class="anchored" data-anchor-id="training-the-ctp">Training the CTP</h4>
+<div id="eb25e716" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Let's train our cluster then predict model.</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>clustering_indices <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="bu">len</span>(all_features) <span class="op">-</span> <span class="dv">1</span>))</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Define the CTP instance.</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>cluster_then_predict <span class="op">=</span> ClusterWeightedEnsembleWrapper(</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    n_clusters <span class="op">=</span> K,</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    model_factory <span class="op">=</span> choose_model_for_cluster_xgb,</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    kmeans_kwargs<span class="op">=</span>{<span class="st">"n_init"</span>: <span class="dv">10</span>, <span class="st">"random_state"</span>: RANDOM_STATE},</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    feature_indices_used_for_clustering<span class="op">=</span>clustering_indices,</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    early_stopping_rounds<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    decay_constant<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>    outside_weight_tau<span class="op">=</span><span class="dv">170</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> train_split(</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> normalized_all_data,</span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> all_labels,</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>    train_percentage <span class="op">=</span> <span class="fl">0.8</span>,</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>    random_state <span class="op">=</span> RANDOM_STATE</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="co">#Clean the data.</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>mask_train <span class="op">=</span> np.isfinite(results[<span class="st">"x_train"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>mask_val <span class="op">=</span> np.isfinite(results[<span class="st">"x_val"</span>]).<span class="bu">all</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>valid_train <span class="op">=</span> results[<span class="st">"x_train"</span>][mask_train]</span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>valid_train_labels <span class="op">=</span> results[<span class="st">"y_train"</span>][mask_train]</span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>valid_val <span class="op">=</span> results[<span class="st">"x_val"</span>][mask_val]</span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>valid_val_labels <span class="op">=</span> results[<span class="st">"y_val"</span>][mask_val]</span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a>valid_train_indices <span class="op">=</span> results[<span class="st">"indices_train"</span>][mask_train]</span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>valid_val_indices <span class="op">=</span> np.array(results[<span class="st">"indices_val"</span>])[mask_val]</span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the CTP. </span></span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>cluster_then_predict <span class="op">=</span> cluster_then_predict.fit(valid_train, valid_train_labels, valid_val, valid_val_labels)</span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>preds_cluster_then_predict <span class="op">=</span> cluster_then_predict.predict(valid_val)</span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model metrics and print them.</span></span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a>cluster_then_predict_metrics <span class="op">=</span> obtain_model_metrics(</span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>    preds_cluster_then_predict,</span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a>    valid_val_labels</span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cluster_then_predict_metrics)</span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>plot_time_series(</span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>    preds_cluster_then_predict,</span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    valid_val_labels,</span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"Predictions - val"</span>,</span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Ground truths"</span>,</span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> DRACULA_COLORS[<span class="st">"purple"</span>],</span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a>    xticks_every <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a><span class="co">#For now what I will do is save this result</span></span>
+<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a>MODEL_FILE_NAME <span class="op">=</span> <span class="st">"cluster_ensemble_model_pooled_3_cities.pkl"</span></span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a>cluster_then_predict.export_model(</span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>    save_dir <span class="op">=</span> PARENT_PATH_EXPORT,</span>
+<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>    filename <span class="op">=</span> <span class="st">"cluster_ensemble_model_pooled_3_cities"</span></span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>SCALER_FILE_NAME <span class="op">=</span> <span class="st">"cluster_ensemble_scaler_pooled_3_cities.pkl"</span></span>
+<span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a>joblib.dump(standard_scaler, PARENT_PATH_EXPORT<span class="op">/</span>SCALER_FILE_NAME)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'mse': np.float64(12.060099588379003), 'rmse': np.float64(3.4727654093501625), 'mae': np.float64(1.8946979783333022), 'r2_val': 0.5321235142487772}</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="training_pooled_model_files/figure-html/cell-13-output-2.png" width="1046" height="471" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="exporting-the-training-and-validation-data" class="level4">
+<h4 class="anchored" data-anchor-id="exporting-the-training-and-validation-data">Exporting the training and validation data</h4>
+<div id="c5dc6006" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the cities for the training and validation instances. </span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> determine_city(index):</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(index <span class="op">&gt;=</span><span class="dv">0</span> <span class="kw">and</span> index<span class="op">&lt;</span><span class="bu">len</span>(data_monterrey)):</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Monterrey"</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span>(index <span class="op">&gt;=</span> <span class="bu">len</span>(data_monterrey) <span class="kw">and</span> index<span class="op">&lt;</span><span class="bu">len</span>(data_monterrey) <span class="op">+</span> <span class="bu">len</span>(data_boston)):</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Boston"</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"San Francisco"</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>cities_training <span class="op">=</span> [determine_city(x) <span class="cf">for</span> x <span class="kw">in</span> valid_train_indices]</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>cities_val <span class="op">=</span> [determine_city(x) <span class="cf">for</span> x <span class="kw">in</span> valid_val_indices]</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="co">#Here I want to export a list of geojsons each containing index, validation/training, cluster, city.</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>n_training <span class="op">=</span> <span class="bu">len</span>(valid_train)</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>all_dictionaries <span class="op">=</span> []</span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a><span class="co">#the pooled matrix is Monterrey rows then Boston rows then San Francisco rows, so index addresses this list directly</span></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>all_building_ids <span class="op">=</span> ids_monterrey <span class="op">+</span> ids_boston <span class="op">+</span> ids_san_francisco</span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_training):</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>    feature_vector <span class="op">=</span> valid_train[i,:]</span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> valid_train_indices[i]</span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a>    city <span class="op">=</span> cities_training[i]</span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>    data_type <span class="op">=</span> <span class="st">"train"</span></span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a>    cluster <span class="op">=</span> np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)))</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a>    real_height <span class="op">=</span> valid_train_labels[i]</span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a>    dictionary <span class="op">=</span> {</span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"feature_names"</span>: all_features,</span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"features"</span>:feature_vector.tolist(),</span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"index"</span>:index,</span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"building_id"</span>: all_building_ids[index],</span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">"city"</span>: city,</span>
+<span id="cb50-35"><a href="#cb50-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">"data_type"</span>: data_type,</span>
+<span id="cb50-36"><a href="#cb50-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cluster"</span>:cluster,</span>
+<span id="cb50-37"><a href="#cb50-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">"real_height"</span>:real_height</span>
+<span id="cb50-38"><a href="#cb50-38" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb50-39"><a href="#cb50-39" aria-hidden="true" tabindex="-1"></a>    all_dictionaries.append(dictionary)</span>
+<span id="cb50-40"><a href="#cb50-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-41"><a href="#cb50-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-42"><a href="#cb50-42" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(valid_val)):</span>
+<span id="cb50-43"><a href="#cb50-43" aria-hidden="true" tabindex="-1"></a>    feature_vector <span class="op">=</span> valid_val[i,:]</span>
+<span id="cb50-44"><a href="#cb50-44" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> valid_val_indices[i]</span>
+<span id="cb50-45"><a href="#cb50-45" aria-hidden="true" tabindex="-1"></a>    city <span class="op">=</span> cities_val[i]</span>
+<span id="cb50-46"><a href="#cb50-46" aria-hidden="true" tabindex="-1"></a>    data_type <span class="op">=</span> <span class="st">"validation"</span></span>
+<span id="cb50-47"><a href="#cb50-47" aria-hidden="true" tabindex="-1"></a>    cluster <span class="op">=</span> np.argmax(cluster_then_predict._compute_weights(feature_vector.reshape(<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)))</span>
+<span id="cb50-48"><a href="#cb50-48" aria-hidden="true" tabindex="-1"></a>    real_height <span class="op">=</span> valid_val_labels[i]</span>
+<span id="cb50-49"><a href="#cb50-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-50"><a href="#cb50-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-51"><a href="#cb50-51" aria-hidden="true" tabindex="-1"></a>    dictionary <span class="op">=</span> {</span>
+<span id="cb50-52"><a href="#cb50-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"feature_names"</span>: all_features,</span>
+<span id="cb50-53"><a href="#cb50-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"features"</span>:feature_vector.tolist(),</span>
+<span id="cb50-54"><a href="#cb50-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"index"</span>:index,</span>
+<span id="cb50-55"><a href="#cb50-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"building_id"</span>: all_building_ids[index],</span>
+<span id="cb50-56"><a href="#cb50-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">"city"</span>: city,</span>
+<span id="cb50-57"><a href="#cb50-57" aria-hidden="true" tabindex="-1"></a>        <span class="st">"data_type"</span>: data_type,</span>
+<span id="cb50-58"><a href="#cb50-58" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cluster"</span>:cluster,</span>
+<span id="cb50-59"><a href="#cb50-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">"real_height"</span>:real_height</span>
+<span id="cb50-60"><a href="#cb50-60" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb50-61"><a href="#cb50-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-62"><a href="#cb50-62" aria-hidden="true" tabindex="-1"></a>    all_dictionaries.append(dictionary)</span>
+<span id="cb50-63"><a href="#cb50-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-64"><a href="#cb50-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-65"><a href="#cb50-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-66"><a href="#cb50-66" aria-hidden="true" tabindex="-1"></a>EXPORT_PATH_DICTS <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"data_pooled_3_cities.json"</span></span>
+<span id="cb50-67"><a href="#cb50-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-68"><a href="#cb50-68" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NumpyEncoder(json.JSONEncoder):</span>
+<span id="cb50-69"><a href="#cb50-69" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> default(<span class="va">self</span>, obj):</span>
+<span id="cb50-70"><a href="#cb50-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(obj, np.ndarray):</span>
+<span id="cb50-71"><a href="#cb50-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> obj.tolist()</span>
+<span id="cb50-72"><a href="#cb50-72" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(obj, (np.integer,)):</span>
+<span id="cb50-73"><a href="#cb50-73" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">int</span>(obj)</span>
+<span id="cb50-74"><a href="#cb50-74" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(obj, (np.floating,)):</span>
+<span id="cb50-75"><a href="#cb50-75" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="bu">float</span>(obj)</span>
+<span id="cb50-76"><a href="#cb50-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">super</span>().default(obj)</span>
+<span id="cb50-77"><a href="#cb50-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-78"><a href="#cb50-78" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(EXPORT_PATH_DICTS, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb50-79"><a href="#cb50-79" aria-hidden="true" tabindex="-1"></a>    json.dump(all_dictionaries, f, indent<span class="op">=</span><span class="dv">2</span>, cls<span class="op">=</span>NumpyEncoder)</span>
+<span id="cb50-80"><a href="#cb50-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-81"><a href="#cb50-81" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the Monterrey sub-file</span></span>
+<span id="cb50-82"><a href="#cb50-82" aria-hidden="true" tabindex="-1"></a>monterrey_dictionaries <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> all_dictionaries <span class="cf">if</span> x[<span class="st">"city"</span>] <span class="op">==</span> <span class="st">"Monterrey"</span>]</span>
+<span id="cb50-83"><a href="#cb50-83" aria-hidden="true" tabindex="-1"></a>EXPORT_PATH_MONTERREY_DICTS <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"data_monterrey.json"</span></span>
+<span id="cb50-84"><a href="#cb50-84" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(EXPORT_PATH_MONTERREY_DICTS, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb50-85"><a href="#cb50-85" aria-hidden="true" tabindex="-1"></a>    json.dump(monterrey_dictionaries, f, indent<span class="op">=</span><span class="dv">2</span>, cls<span class="op">=</span>NumpyEncoder)</span>
+<span id="cb50-86"><a href="#cb50-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-87"><a href="#cb50-87" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the Boston sub-file</span></span>
+<span id="cb50-88"><a href="#cb50-88" aria-hidden="true" tabindex="-1"></a>boston_dictionaries <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> all_dictionaries <span class="cf">if</span> x[<span class="st">"city"</span>] <span class="op">==</span> <span class="st">"Boston"</span>]</span>
+<span id="cb50-89"><a href="#cb50-89" aria-hidden="true" tabindex="-1"></a>EXPORT_PATH_BOSTON_DICTS <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"data_boston.json"</span></span>
+<span id="cb50-90"><a href="#cb50-90" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(EXPORT_PATH_BOSTON_DICTS, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb50-91"><a href="#cb50-91" aria-hidden="true" tabindex="-1"></a>    json.dump(boston_dictionaries, f, indent<span class="op">=</span><span class="dv">2</span>, cls<span class="op">=</span>NumpyEncoder)</span>
+<span id="cb50-92"><a href="#cb50-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-93"><a href="#cb50-93" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the San Francisco sub-file</span></span>
+<span id="cb50-94"><a href="#cb50-94" aria-hidden="true" tabindex="-1"></a>san_francisco_dictionaries <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> all_dictionaries <span class="cf">if</span> x[<span class="st">"city"</span>] <span class="op">==</span> <span class="st">"San Francisco"</span>]</span>
+<span id="cb50-95"><a href="#cb50-95" aria-hidden="true" tabindex="-1"></a>EXPORT_PATH_SAN_FRANCISCO_DICTS <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"data_sanfrancisco.json"</span></span>
+<span id="cb50-96"><a href="#cb50-96" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(EXPORT_PATH_SAN_FRANCISCO_DICTS, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb50-97"><a href="#cb50-97" aria-hidden="true" tabindex="-1"></a>    json.dump(san_francisco_dictionaries, f, indent<span class="op">=</span><span class="dv">2</span>, cls<span class="op">=</span>NumpyEncoder)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
