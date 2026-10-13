@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="define-metrics-calculation-functions" class="level4">
 <h4 class="anchored" data-anchor-id="define-metrics-calculation-functions">Define metrics calculation functions</h4>
-<div id="2970fe37" class="cell" data-execution_count="1">
+<div id="8455e5d2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -177,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="opening-the-ground-truth-data" class="level4">
 <h4 class="anchored" data-anchor-id="opening-the-ground-truth-data">Opening the ground truth data</h4>
-<div id="cbee06f5" class="cell" data-execution_count="2">
+<div id="c3e0afc8" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>PARENT_PATH <span class="op">=</span> Path(<span class="st">"/Users/legariapena.j/Library/CloudStorage/GoogleDrive-legariapena.j@husky.neu.edu/Shared drives/Cool and Carbon Free Africa/Building Image Datasets/data"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Ground truth data Monterrey</span></span>
@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="opening-the-footprint-batches" class="level3">
 <h3 class="anchored" data-anchor-id="opening-the-footprint-batches">Opening the footprint batches</h3>
 <p>The batches were obtained by applying the Imageable library’s pipeline to the Monterrey buildings sample.</p>
-<div id="1572c7b9" class="cell" data-execution_count="3">
+<div id="3a1e02f9" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>BATCHES_NAMES <span class="op">=</span> [<span class="st">"1-1000"</span>, <span class="st">"1000-2000"</span>, <span class="st">"2000-3000"</span>, <span class="st">"3000-4000"</span>, <span class="st">"4000-5000"</span>, <span class="st">"5000-6000"</span>, <span class="st">"6000-7000"</span>, <span class="st">"7000-8000"</span>, <span class="st">"8000-9000"</span>, <span class="st">"9000-10000"</span>]</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>monterrey_geojsons <span class="op">=</span> {}</span>
@@ -269,7 +269,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="expanding-the-materials" class="level3">
 <h3 class="anchored" data-anchor-id="expanding-the-materials">Expanding the materials</h3>
 <p>The material column is currently a dictionary and has to be expanded so that each material receives its own column.</p>
-<div id="ab182f5d" class="cell" data-execution_count="4">
+<div id="5eb05f21" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ast</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -478,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reducing-the-number-of-features" class="level3">
 <h3 class="anchored" data-anchor-id="reducing-the-number-of-features">Reducing the number of features</h3>
 <p>We reduce the number of features to the those that are used to train the models.</p>
-<div id="38fac60a" class="cell" data-execution_count="5">
+<div id="3e2d3373" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FOOTPRINT_FEATURES <span class="op">=</span> [</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unprojected_area"</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"projected_area"</span>,</span>
@@ -534,13 +534,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="extracting-the-ground-truths" class="level3">
 <h3 class="anchored" data-anchor-id="extracting-the-ground-truths">Extracting the ground truths</h3>
-<div id="39c3464c" class="cell" data-execution_count="6">
+<div id="95cf0e96" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>heights_monterrey <span class="op">=</span> ground_truth_monterrey[<span class="st">"height"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="training-the-single-xgboost" class="level3">
 <h3 class="anchored" data-anchor-id="training-the-single-xgboost">Training the single XGBoost</h3>
-<div id="3b8453cf" class="cell" data-execution_count="7">
+<div id="c830d696" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#A function to split the data into training and validation sets.</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_split(data, labels, train_percentage <span class="op">=</span> <span class="fl">0.8</span>, random_state <span class="op">=</span> <span class="dv">42</span>):</span>
@@ -571,7 +571,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now let’s train the model.</p>
-<div id="e0b45163" class="cell" data-execution_count="8">
+<div id="afb1a1ed" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>PARENT_PATH_EXPORT <span class="op">=</span> Path(<span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>all_data <span class="op">=</span> data_monterrey.copy()</span>
@@ -662,7 +662,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="training-the-footprint-based-model" class="level3">
 <h3 class="anchored" data-anchor-id="training-the-footprint-based-model">Training the footprint-based model</h3>
 <p>Let’s run something similar to train a model that only uses footprint features.</p>
-<div id="15d16ab8" class="cell" data-execution_count="9">
+<div id="a70de192" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get only the indices of footprint features</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>indices_footprints <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(all_features)) <span class="cf">if</span> all_features[i] <span class="kw">in</span> FOOTPRINT_FEATURES]</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -670,43 +670,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>footprint_data <span class="op">=</span> normalized_data[:, indices_footprints]</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the train/va. split.</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>valid_train <span class="op">=</span> footprint_data[indices_train]</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>valid_train_labels <span class="op">=</span> all_labels[indices_train]</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>valid_val <span class="op">=</span> footprint_data[indices_val]</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>valid_val_labels <span class="op">=</span> all_labels[indices_val]</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>valid_train_indices <span class="op">=</span> indices_train</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>valid_val_indices <span class="op">=</span> indices_val</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the footprint-based model using the same XGBoost configuration that we used for the single model. </span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS, early_stopping_rounds<span class="op">=</span><span class="dv">50</span>)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model.fit(valid_train, valid_train_labels, eval_set<span class="op">=</span>[(valid_val, valid_val_labels)], verbose<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>preds_footprint_xgb <span class="op">=</span> xgb_footprint_model.predict(valid_val)</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the footprint-based model.</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>FOOTPRINT_MODEL_PATH <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"footprint_xgb_model_monterrey.pkl"</span></span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>joblib.dump(xgb_footprint_model, FOOTPRINT_MODEL_PATH)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_split_monterrey.json"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    footprint_split <span class="op">=</span> json.load(f)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>footprint_indices_train <span class="op">=</span> np.array([ids_monterrey.index(d[<span class="st">"building_id"</span>]) <span class="cf">for</span> d <span class="kw">in</span> footprint_split <span class="cf">if</span> d[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"train"</span>])</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>footprint_indices_val <span class="op">=</span> np.array([ids_monterrey.index(d[<span class="st">"building_id"</span>]) <span class="cf">for</span> d <span class="kw">in</span> footprint_split <span class="cf">if</span> d[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"validation"</span>])</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>valid_train <span class="op">=</span> footprint_data[footprint_indices_train]</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>valid_train_labels <span class="op">=</span> all_labels[footprint_indices_train]</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>valid_val <span class="op">=</span> footprint_data[footprint_indices_val]</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>valid_val_labels <span class="op">=</span> all_labels[footprint_indices_val]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>valid_train_indices <span class="op">=</span> footprint_indices_train</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>valid_val_indices <span class="op">=</span> footprint_indices_val</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the footprint-based model using the same XGBoost configuration that we used for the single model. </span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model <span class="op">=</span> XGBRegressor(<span class="op">**</span>XGB_PARAMS, early_stopping_rounds<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>xgb_footprint_model.fit(valid_train, valid_train_labels, eval_set<span class="op">=</span>[(valid_val, valid_val_labels)], verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>preds_footprint_xgb <span class="op">=</span> xgb_footprint_model.predict(valid_val)</span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model metrics and print them.</span></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>footprint_model_metrics <span class="op">=</span> obtain_model_metrics(</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    valid_val_labels</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(footprint_model_metrics)</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot the predicted vs. ground truth plot for the validation instances. </span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>plot_time_series(</span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    valid_val_labels,</span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"Predictions - val"</span>,</span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Ground truths"</span>,</span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"purple"</span>,</span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="dv">0</span>,</span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    xticks_every <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co">#Export the footprint-based model.</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>FOOTPRINT_MODEL_PATH <span class="op">=</span> PARENT_PATH_EXPORT<span class="op">/</span><span class="st">"footprint_xgb_model_monterrey.pkl"</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>joblib.dump(xgb_footprint_model, FOOTPRINT_MODEL_PATH)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="co">#Get the model metrics and print them.</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>footprint_model_metrics <span class="op">=</span> obtain_model_metrics(</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    valid_val_labels</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(footprint_model_metrics)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Plot the predicted vs. ground truth plot for the validation instances. </span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>plot_time_series(</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    preds_footprint_xgb,</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    valid_val_labels,</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    x_label <span class="op">=</span> <span class="st">"Predictions - val"</span>,</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    y_label <span class="op">=</span> <span class="st">"Ground truths"</span>,</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"purple"</span>,</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    xticks_every <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>{'mse': np.float64(5.4674399399094415), 'rmse': np.float64(2.3382557473273624), 'mae': np.float64(1.4126239400626344), 'r2_val': 0.07247078639436533}</code></pre>
+<pre><code>{'mse': np.float64(5.479802109237576), 'rmse': np.float64(2.340897714390267), 'mae': np.float64(1.4276442122316984), 'r2_val': 0.07629099560129149}</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -723,7 +727,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="comparison-of-the-models-over-multiple-random-seed-values" class="level3">
 <h3 class="anchored" data-anchor-id="comparison-of-the-models-over-multiple-random-seed-values">Comparison of the models over multiple random seed values</h3>
-<div id="51e58a1e" class="cell" data-execution_count="10">
+<div id="b08997ec" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>clustering_indices <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="bu">len</span>(all_features) <span class="op">-</span> <span class="dv">1</span>))</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>SEEDS <span class="op">=</span> <span class="bu">range</span>(<span class="dv">20</span>, <span class="dv">50</span>)</span>
@@ -914,7 +918,7 @@ Saved to /Users/legariapena.j/Documents/imageable-2026/imageable/clustering-pape
 </section>
 <section id="choosing-k-for-the-cluster-then-predict-model-ctp" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-k-for-the-cluster-then-predict-model-ctp">Choosing K for the cluster-then-predict model (CTP)</h3>
-<div id="c953e592" class="cell" data-execution_count="11">
+<div id="32652316" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>MIN_CLUSTER_SIZE <span class="op">=</span> <span class="dv">25</span></span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>K_CHOSEN <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1004,7 +1008,7 @@ k chosen: 3
 </section>
 <section id="training-the-cluster-then-predict-ctp-model" class="level3">
 <h3 class="anchored" data-anchor-id="training-the-cluster-then-predict-ctp-model">Training the cluster-then-predict (CTP) model</h3>
-<div id="1b8193bc" class="cell" data-execution_count="12">
+<div id="ec04ea2b" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Let's train the CTP</span></span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="co">#We exclude the SVI height from the list of features used for clustering.</span></span>
@@ -1068,6 +1072,19 @@ k chosen: 3
 </figure>
 </div>
 </div>
+</div>
+</section>
+<section id="adding-the-monterrey-clusters-to-the-per-city-data" class="level3">
+<h3 class="anchored" data-anchor-id="adding-the-monterrey-clusters-to-the-per-city-data">Adding the Monterrey clusters to the per-city data</h3>
+<p>The per-city file from the pooled notebook carries the clusters of the pooled model. Let’s replace them with the clusters of the Monterrey model.</p>
+<div id="46894781" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>features_monterrey <span class="op">=</span> np.array([d[<span class="st">"features"</span>] <span class="cf">for</span> d <span class="kw">in</span> dictionaries_monterrey])</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>clusters_monterrey <span class="op">=</span> np.argmax(cluster_then_predict._compute_weights(features_monterrey), axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(dictionaries_monterrey)):</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    dictionaries_monterrey[i][<span class="st">"cluster"</span>] <span class="op">=</span> <span class="bu">int</span>(clusters_monterrey[i])</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_monterrey.json"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    json.dump(dictionaries_monterrey, f, indent<span class="op">=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 

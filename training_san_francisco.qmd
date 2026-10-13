@@ -312,12 +312,16 @@ indices_footprints = [i for i in range(len(all_features)) if all_features[i] in 
 footprint_data = normalized_data[:, indices_footprints]
 
 #Get the train/va. split.
-valid_train = footprint_data[indices_train]
-valid_train_labels = all_labels[indices_train]
-valid_val = footprint_data[indices_val]
-valid_val_labels = all_labels[indices_val]
-valid_train_indices = indices_train
-valid_val_indices = indices_val
+with open("/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_split_sanfrancisco.json") as f:
+    footprint_split = json.load(f)
+footprint_indices_train = np.array([ids_sanfrancisco.index(d["building_id"]) for d in footprint_split if d["data_type"] == "train"])
+footprint_indices_val = np.array([ids_sanfrancisco.index(d["building_id"]) for d in footprint_split if d["data_type"] == "validation"])
+valid_train = footprint_data[footprint_indices_train]
+valid_train_labels = all_labels[footprint_indices_train]
+valid_val = footprint_data[footprint_indices_val]
+valid_val_labels = all_labels[footprint_indices_val]
+valid_train_indices = footprint_indices_train
+valid_val_indices = footprint_indices_val
 
 
 # Train the footprint-based model using the same XGBoost configuration that we used for the single model. 
@@ -567,4 +571,17 @@ cluster_then_predict.export_model(
     save_dir = PARENT_PATH_EXPORT,
     filename = "cluster_ensemble_model_sanfrancisco"
 )
+```
+
+### Adding the San Francisco clusters to the per-city data
+
+The per-city file from the pooled notebook carries the clusters of the pooled model. Let's replace them with the clusters of the San Francisco model.
+```{python}
+features_sanfrancisco = np.array([d["features"] for d in dictionaries_sanfrancisco])
+clusters_sanfrancisco = np.argmax(cluster_then_predict._compute_weights(features_sanfrancisco), axis = 1)
+for i in range(len(dictionaries_sanfrancisco)):
+    dictionaries_sanfrancisco[i]["cluster"] = int(clusters_sanfrancisco[i])
+
+with open("/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_sanfrancisco.json", "w") as f:
+    json.dump(dictionaries_sanfrancisco, f, indent=2)
 ```

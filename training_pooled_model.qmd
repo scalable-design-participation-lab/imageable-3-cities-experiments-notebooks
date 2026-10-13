@@ -430,6 +430,8 @@ valid_val = results["x_val"][mask_val]
 valid_val_labels = results["y_val"][mask_val]
 valid_train_indices = results["indices_train"][mask_train]
 valid_val_indices = np.array(results["indices_val"])[mask_val]
+footprint_train_indices = valid_train_indices
+footprint_val_indices = valid_val_indices
 
 
 # Train the footprint-based model. 
@@ -786,4 +788,11 @@ san_francisco_dictionaries = [x for x in all_dictionaries if x["city"] == "San F
 EXPORT_PATH_SAN_FRANCISCO_DICTS = PARENT_PATH_EXPORT/"data_sanfrancisco.json"
 with open(EXPORT_PATH_SAN_FRANCISCO_DICTS, "w") as f:
     json.dump(san_francisco_dictionaries, f, indent=2, cls=NumpyEncoder)
+
+#Export the footprint split per city. It also holds the buildings without materials.
+for city, name in [("Monterrey", "monterrey"), ("Boston", "boston"), ("San Francisco", "sanfrancisco")]:
+    footprint_split = [{"building_id": all_building_ids[i], "data_type": "train"} for i in footprint_train_indices if determine_city(i) == city]
+    footprint_split += [{"building_id": all_building_ids[i], "data_type": "validation"} for i in footprint_val_indices if determine_city(i) == city]
+    with open(PARENT_PATH_EXPORT/f"footprint_split_{name}.json", "w") as f:
+        json.dump(footprint_split, f, indent=2)
 ```
