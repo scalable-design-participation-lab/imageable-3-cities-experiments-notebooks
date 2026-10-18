@@ -616,9 +616,9 @@ combine_cluster_elements(
 visualization = WheelVisualization(
     all_elements,
     radius_size = 40,
-    image_scale = 0.5,
+    image_scale = 0.7,
     image_outer_boost = 1.2,
-    reduction_factor = 0.7
+    reduction_factor = 0.5
     )
 
 visualization.draw_wheel(
@@ -645,9 +645,9 @@ combine_cluster_elements(
 visualization = WheelVisualization(
     all_elements,
     radius_size = 40,
-    image_scale = 0.5,
+    image_scale = 0.7,
     image_outer_boost = 1.2,
-    reduction_factor = 0.7
+    reduction_factor = 0.5
     )
 
 visualization.draw_wheel(
@@ -674,9 +674,9 @@ combine_cluster_elements(
 visualization = WheelVisualization(
     all_elements,
     radius_size = 40,
-    image_scale = 0.5,
+    image_scale = 0.7,
     image_outer_boost = 1.2,
-    reduction_factor = 0.7
+    reduction_factor = 0.5
     )
 
 visualization.draw_wheel(

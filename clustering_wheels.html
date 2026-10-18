@@ -125,7 +125,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="opening-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="opening-the-data">Opening the data</h3>
 <p>First let’s open the ground truth data.</p>
-<div id="9ff32e9d" class="cell" data-execution_count="1">
+<div id="e35207ac" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -315,7 +315,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Now let’s open the results obtained by applying Imageable to each city.</p>
-<div id="d10197cc" class="cell" data-execution_count="2">
+<div id="36c0b29c" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>batches_names <span class="op">=</span> [<span class="st">"1-1000"</span>,<span class="st">"1000-2000"</span>,<span class="st">"2000-3000"</span>, <span class="st">"3000-4000"</span>, <span class="st">"4000-5000"</span>, <span class="st">"5000-6000"</span>, <span class="st">"6000-7000"</span>, <span class="st">"7000=8000"</span>, <span class="st">"8000-9000"</span>, <span class="st">"9000-10000"</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Open Monterrey batches. </span></span>
@@ -540,7 +540,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="expand-the-material-columns" class="level3">
 <h3 class="anchored" data-anchor-id="expand-the-material-columns">Expand the material columns</h3>
 <p>Let’s expand the material dictionaries into multiple columns.</p>
-<div id="8dd55b72" class="cell" data-execution_count="3">
+<div id="2734a723" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Define a function to expand the materials.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> expand_materials(gdf):</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#This would be a list of dictionaries.</span></span>
@@ -577,7 +577,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gdf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now let’s apply the function to the per-city GDFs and the pooled one.</p>
-<div id="3bf51200" class="cell" data-execution_count="4">
+<div id="c3940f00" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>gdf_monterrey <span class="op">=</span> expand_materials(gdf_monterrey)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gdf_boston <span class="op">=</span> expand_materials(gdf_boston)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>gdf_san_francisco <span class="op">=</span> expand_materials(gdf_san_francisco)</span>
@@ -646,7 +646,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Cluster of each instance.</li>
 <li>Possibly path to image, but I need to remember how to reconstruct that.</li>
 </ol>
-<div id="772a2003" class="cell" data-execution_count="5">
+<div id="cca6f821" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>DICTIONARIES_PATH <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_pooled_3_cities.json"</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(DICTIONARIES_PATH, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
@@ -700,7 +700,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="get-the-wheel-properties" class="level2">
 <h2 class="anchored" data-anchor-id="get-the-wheel-properties">Get the wheel properties</h2>
 <p>Let’s get the wheel properties one by one for each city and for the pooled case.</p>
-<div id="e621e03e" class="cell" data-execution_count="6">
+<div id="a2bb458a" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Necessary paths</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>PATH_CTP_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ctp_model_pooled <span class="op">=</span> joblib.load(PATH_CTP_POOLED)</span>
@@ -798,7 +798,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="rmse-gains" class="level3">
 <h3 class="anchored" data-anchor-id="rmse-gains">RMSE gains</h3>
-<div id="7a3729dd" class="cell" data-execution_count="7">
+<div id="69d41341" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>RMSE_PROPERTY_NAME <span class="op">=</span> <span class="st">"RMSE Gain"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save_rmse_wheel_elements(</span>
@@ -834,7 +834,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="building-heights" class="level3">
 <h3 class="anchored" data-anchor-id="building-heights">Building heights</h3>
-<div id="66cac1b4" class="cell" data-execution_count="8">
+<div id="6bba67bc" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>BUILDING_HEIGHT_PROPERTY <span class="op">=</span> <span class="st">"Building height"</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save_building_height_wheel_elements(</span>
@@ -868,7 +868,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="majority-city" class="level3">
 <h3 class="anchored" data-anchor-id="majority-city">Majority City</h3>
 <p>Calculate the city that contributes the highest share of buildings for each cluster and the percentage it contributes.</p>
-<div id="45e9ca6a" class="cell" data-execution_count="9">
+<div id="58e3f693" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_majority_city_and_percentage(cities_list):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    unique_categories <span class="op">=</span> <span class="bu">list</span>(np.unique(cities_list))</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    n_unique_categories <span class="op">=</span> <span class="bu">len</span>(unique_categories)</span>
@@ -922,7 +922,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="majority-material" class="level3">
 <h3 class="anchored" data-anchor-id="majority-material">Majority material</h3>
 <p>Calculate the material that dominates the facade of most buildings in each cluster and the percentage of buildings it dominates.</p>
-<div id="05680332" class="cell" data-execution_count="10">
+<div id="7ec614f7" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#The materials the models use.</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>VALID_MATERIALS <span class="op">=</span> [<span class="st">"concrete"</span>, <span class="st">"metal"</span>, <span class="st">"glass"</span>, <span class="st">"plastic"</span>, <span class="st">"asphalt"</span>, <span class="st">"brick"</span>, <span class="st">"human_body"</span>, <span class="st">"wood"</span>, <span class="st">"plaster"</span>, <span class="st">"leaf"</span>]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>MATERIAL_NAMES <span class="op">=</span> {<span class="st">"human_body"</span>: <span class="st">"person"</span>, <span class="st">"leaf"</span>: <span class="st">"vegetation"</span>}</span>
@@ -962,7 +962,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="representative-footprint-and-svi" class="level3">
 <h3 class="anchored" data-anchor-id="representative-footprint-and-svi">Representative footprint and SVI</h3>
 <p>Get a representative footprint and SVI for each of the clusters.</p>
-<div id="6c8af94b" class="cell" data-execution_count="11">
+<div id="24165de8" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_distance_to_cluster(vector, cluster_centroid):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    n_features <span class="op">=</span> <span class="bu">len</span>(vector)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    dst <span class="op">=</span> <span class="dv">0</span></span>
@@ -1039,7 +1039,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="wheel-diagram-for-the-pooled-case" class="level3">
 <h3 class="anchored" data-anchor-id="wheel-diagram-for-the-pooled-case">Wheel Diagram for the Pooled case</h3>
 <p>Let’s draw the wheel diagram for the pooled case, which combines all data from Monterrey, Boston, and San Francisco.</p>
-<div id="fdc2a209" class="cell" data-execution_count="12">
+<div id="81d55efd" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>all_elements <span class="op">=</span> []</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> combine_cluster_elements(elements, cluster_elements,key,n_clusters):</span>
@@ -1076,7 +1076,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="wheel-diagram-for-the-monterrey-case" class="level3">
 <h3 class="anchored" data-anchor-id="wheel-diagram-for-the-monterrey-case">Wheel Diagram for the Monterrey case</h3>
-<div id="a5219bea" class="cell" data-execution_count="13">
+<div id="030001f3" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>all_elements <span class="op">=</span> []</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>combine_cluster_elements(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
@@ -1088,9 +1088,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>visualization <span class="op">=</span> WheelVisualization(</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    radius_size <span class="op">=</span> <span class="dv">40</span>,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    image_outer_boost <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.7</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.5</span></span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>visualization.draw_wheel(</span>
@@ -1113,7 +1113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="wheel-diagram-for-the-boston-case" class="level3">
 <h3 class="anchored" data-anchor-id="wheel-diagram-for-the-boston-case">Wheel diagram for the Boston case</h3>
-<div id="2f4dd376" class="cell" data-execution_count="14">
+<div id="19e5c525" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>all_elements <span class="op">=</span> []</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>combine_cluster_elements(</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
@@ -1125,9 +1125,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>visualization <span class="op">=</span> WheelVisualization(</span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    radius_size <span class="op">=</span> <span class="dv">40</span>,</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    image_outer_boost <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.7</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.5</span></span>
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>visualization.draw_wheel(</span>
@@ -1150,7 +1150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="wheel-diagram-for-the-san-francisco-case" class="level3">
 <h3 class="anchored" data-anchor-id="wheel-diagram-for-the-san-francisco-case">Wheel diagram for the San Francisco case</h3>
-<div id="7c23da3a" class="cell" data-execution_count="15">
+<div id="8597fecb" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>all_elements <span class="op">=</span> []</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>combine_cluster_elements(</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
@@ -1162,9 +1162,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>visualization <span class="op">=</span> WheelVisualization(</span>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    all_elements,</span>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    radius_size <span class="op">=</span> <span class="dv">40</span>,</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    image_scale <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    image_outer_boost <span class="op">=</span> <span class="fl">1.2</span>,</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.7</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    reduction_factor <span class="op">=</span> <span class="fl">0.5</span></span>
 <span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>visualization.draw_wheel(</span>
