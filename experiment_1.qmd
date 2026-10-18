@@ -1,0 +1,384 @@
+---
+title: Experiment 1
+author: Uriel Legaria
+jupyter: imageable
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+### Define auxiliary functions
+```{python}
+import json
+import numpy as np
+import pandas as pd
+import joblib
+from scipy.stats import wilcoxon
+
+#Wilcoxon's statistic and p-value
+def get_wilcoxon(diffs):
+    statistic, p_value = wilcoxon(
+        diffs,
+        alternative = "greater",
+        method = "auto"
+    )
+    return statistic, p_value
+
+
+def get_indices_with_threshold(values, threshold, upper = True):
+    """
+    Returns the indices of values above or below a threshold (depending on the value of `upper`).
+    """
+    indices = []
+    for i in range(0,len(values)):
+        value = values[i]
+        if(value > threshold and upper):
+            indices.append(i)
+        elif(not upper and value < threshold):
+            indices.append(i)
+        
+    return indices
+
+
+def filter_by_indices(values, indices):
+    """
+    Return only the values at locations indicated in indices.
+    """
+
+    new_values = []
+    for i in range(0,len(values)):
+        if (i in indices):
+            new_values.append(values[i])
+    
+    return new_values
+
+
+def get_error_differences(
+        model_1_values,
+        model_2_values,
+        real_values
+    ):
+    error_differences = []
+    for i in range(0,len(real_values)):
+        real_value = real_values[i]
+        value1 = model_1_values[i]
+        value2 = model_2_values[i]
+
+        error1 = np.abs(value1 - real_value)
+        error2 = np.abs(value2 - real_value)
+
+        error_difference = error1 - error2
+
+        error_differences.append(error_difference)
+    
+    return error_differences
+```
+
+### Load the models
+```{python}
+#Necessary paths
+PATH_CTP_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"
+ctp_model_pooled = joblib.load(PATH_CTP_POOLED)
+PATH_CTP_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_monterrey.pkl"
+ctp_model_monterrey = joblib.load(PATH_CTP_MONTERREY)
+PATH_CTP_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_boston.pkl"
+ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
+PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
+ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
+
+PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
+footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
+PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
+footprint_model_monterrey = joblib.load(PATH_FOOTPRINT_MONTERREY)
+PATH_FOOTPRINT_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"
+footprint_model_boston = joblib.load(PATH_FOOTPRINT_BOSTON)
+PATH_FOOTPRINT_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"
+footprint_model_san_francisco = joblib.load(PATH_FOOTPRINT_SF)
+```
+
+### Define the experiment function
+
+```{python}
+#This experiment applies the experiment to get one of the rows.
+def run_experiment_1(
+    dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    footprint_city_model,
+    footprint_combined_model,
+    feature,
+    percentile,
+    above = True,
+):
+
+    results = {}
+    FEATURE_NAMES = dictionaries[0]["feature_names"]
+    
+    validation_dictionaries = [x for x in dictionaries if x["data_type"] == "validation"]
+
+    all_features = [x["features"] for x in validation_dictionaries]
+    #The reference height is not one of the features, so it is read from real_height.
+    if(feature == "real_height"):
+        all_values = [x["real_height"] for x in validation_dictionaries]
+    else:
+        index_of_feature = FEATURE_NAMES.index(feature)
+        all_values = [x["features"][index_of_feature] for x in validation_dictionaries]
+    all_real_heights = [x["real_height"] for x in validation_dictionaries]
+
+    percentile_threshold = np.percentile(all_values, percentile)
+
+    filtered_indices = get_indices_with_threshold(
+        all_values,
+        percentile_threshold,
+        upper = above
+    )
+
+    #Filter the features
+    filtered_features = filter_by_indices(
+        all_features,
+        filtered_indices
+    )
+
+    #Filtered ground truths
+    filtered_real_heights = filter_by_indices(
+        all_real_heights,
+        filtered_indices
+    )
+
+    predictions_ctp_city_model = ctp_city_model.predict(np.array(all_features))
+    predictions_ctp_city_model_subgroup = ctp_city_model.predict(np.array(filtered_features))
+
+    predictions_ctp_combined_model = ctp_combined_model.predict(np.array(all_features))
+    predictions_ctp_combined_model_subgroup = ctp_combined_model.predict(np.array(filtered_features))
+
+    #The footprint models only use the 13 footprint features, which come first.
+    predictions_footprint_city_model = footprint_city_model.predict(np.array(all_features)[:, :13])
+    predictions_footprint_city_model_subgroup = footprint_city_model.predict(np.array(filtered_features)[:, :13])
+
+    predictions_footprint_combined_model = footprint_combined_model.predict(np.array(all_features)[:, :13])
+    predictions_footprint_combined_model_subgroup = footprint_combined_model.predict(np.array(filtered_features)[:, :13])
+
+    delta_all = get_error_differences(predictions_ctp_city_model, predictions_ctp_combined_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_ctp_city_model_subgroup, predictions_ctp_combined_model_subgroup, filtered_real_heights)
+
+
+
+    results["CTP_city - CTP_comb - delta subgroup"] =np.mean(delta_subgroup)
+    results["CTP_city - CTP_comb - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    statistic, p_value = get_wilcoxon(
+        delta_subgroup
+    )
+    results["CTP_city - CTP_comb - wilcoxon p"] =  p_value
+
+    #Footprint city model against footprint combined model.
+    delta_all = get_error_differences(predictions_footprint_city_model, predictions_footprint_combined_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_footprint_city_model_subgroup, predictions_footprint_combined_model_subgroup, filtered_real_heights)
+
+    results["Footprint_city - Footprint_comb - delta subgroup"] = np.mean(delta_subgroup)
+    results["Footprint_city - Footprint_comb - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    statistic, p_value = get_wilcoxon(
+        delta_subgroup
+    )
+    results["Footprint_city - Footprint_comb - wilcoxon p"] = p_value
+
+    #Footprint city model against CTP city model.
+    delta_all = get_error_differences(predictions_footprint_city_model, predictions_ctp_city_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_footprint_city_model_subgroup, predictions_ctp_city_model_subgroup, filtered_real_heights)
+
+    results["Footprint_city - CTP_city - delta subgroup"] = np.mean(delta_subgroup)
+    results["Footprint_city - CTP_city - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    #The test asks whether the footprint model has the lower error, so it runs on CTP minus footprint.
+    statistic, p_value = get_wilcoxon(
+        get_error_differences(predictions_ctp_city_model_subgroup, predictions_footprint_city_model_subgroup, filtered_real_heights)
+    )
+    results["Footprint_city - CTP_city - wilcoxon p"] = p_value
+
+    #Footprint combined model against CTP combined model.
+    delta_all = get_error_differences(predictions_footprint_combined_model, predictions_ctp_combined_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_footprint_combined_model_subgroup, predictions_ctp_combined_model_subgroup, filtered_real_heights)
+
+    results["Footprint_comb - CTP_comb - delta subgroup"] = np.mean(delta_subgroup)
+    results["Footprint_comb - CTP_comb - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    #The test asks whether the footprint model has the lower error, so it runs on CTP minus footprint.
+    statistic, p_value = get_wilcoxon(
+        get_error_differences(predictions_ctp_combined_model_subgroup, predictions_footprint_combined_model_subgroup, filtered_real_heights)
+    )
+    results["Footprint_comb - CTP_comb - wilcoxon p"] = p_value
+
+    return results
+```
+
+### Open the data
+```{python}
+DATA_PATH = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"
+
+with open(f"{DATA_PATH}/data_monterrey.json") as f:
+    data_monterrey = json.load(f)
+
+with open(f"{DATA_PATH}/data_boston.json") as f:
+    data_boston = json.load(f)
+
+with open(f"{DATA_PATH}/data_sanfrancisco.json") as f:
+    data_sanfrancisco = json.load(f)
+```
+
+### Building the table rows
+Each cell shows the subgroup delta, its stars, and the gain, as in the paper.
+```{python}
+FEATURES = [
+    ("real_height", "Reference height"),
+    ("building_height", "Street-view height"),
+    ("complexity", "Footprint complexity"),
+    ("isoperimetric_quotient", "Compactness"),
+    ("material_pct_leaf", "Facade vegetation"),
+    ("mean_distance_to_neighbors", "Mean neighbour distance"),
+    ("nearest_neighbor_distance", "Nearest neighbour distance"),
+    ("n_vertices", "Number of vertices")
+]
+
+COMPARISONS = [
+    ("CTP_city - CTP_comb", "C_city - C_comb"),
+    ("Footprint_city - Footprint_comb", "F_city - F_comb"),
+    ("Footprint_city - CTP_city", "F_city - C_city"),
+    ("Footprint_comb - CTP_comb", "F_comb - C_comb")
+]
+
+def get_stars(p_value):
+    if(p_value < 0.001):
+        return "***"
+    elif(p_value < 0.01):
+        return "**"
+    elif(p_value < 0.05):
+        return "*"
+    return ""
+
+def format_value(value):
+    text = f"{value:+.2f}"
+    if(text in ["+0.00", "-0.00"]):
+        return "0.00"
+    return text
+
+def format_cell(delta, gain, p_value):
+    return f"{format_value(delta)}{get_stars(p_value)} / {format_value(gain)}"
+
+def get_city_rows(dictionaries, ctp_city_model, footprint_city_model):
+    rows = []
+    for feature, label in FEATURES:
+        for above, group in [(True, "Above"), (False, "Below")]:
+            results = run_experiment_1(
+                dictionaries,
+                ctp_city_model,
+                ctp_model_pooled,
+                footprint_city_model,
+                footprint_model_pooled,
+                feature,
+                75,
+                above = above
+            )
+            row = {"Feature": label, "Group": group}
+            for key, column in COMPARISONS:
+                row[column] = format_cell(
+                    results[key + " - delta subgroup"],
+                    results[key + " - gain"],
+                    results[key + " - wilcoxon p"]
+                )
+            rows.append(row)
+    return rows
+
+CITY_TABLE_COLUMNS = ["Feature", "Group"] + [column for key, column in COMPARISONS]
+```
+
+### Monterrey table
+```{python}
+monterrey_rows = get_city_rows(data_monterrey, ctp_model_monterrey, footprint_model_monterrey)
+
+dataframe_dictionary = {column: [x[column] for x in monterrey_rows] for column in CITY_TABLE_COLUMNS}
+dataframe_monterrey = pd.DataFrame(data = dataframe_dictionary)
+dataframe_monterrey
+```
+
+### Boston table
+```{python}
+boston_rows = get_city_rows(data_boston, ctp_model_boston, footprint_model_boston)
+
+dataframe_dictionary = {column: [x[column] for x in boston_rows] for column in CITY_TABLE_COLUMNS}
+dataframe_boston = pd.DataFrame(data = dataframe_dictionary)
+dataframe_boston
+```
+
+### San Francisco table
+```{python}
+san_francisco_rows = get_city_rows(data_sanfrancisco, ctp_model_san_francisco, footprint_model_san_francisco)
+
+dataframe_dictionary = {column: [x[column] for x in san_francisco_rows] for column in CITY_TABLE_COLUMNS}
+dataframe_san_francisco = pd.DataFrame(data = dataframe_dictionary)
+dataframe_san_francisco
+```
+
+### All cities table
+The threshold comes from the validation buildings of the three cities together. Each cell compares the combined footprint model with the combined CTP model, and the stars test whether the CTP model has the lower error.
+```{python}
+def run_experiment_1_all_cities(
+    city_dictionaries,
+    ctp_combined_model,
+    footprint_combined_model,
+    feature,
+    percentile,
+    above = True,
+):
+    #Validation buildings and feature values of each city.
+    validation_dictionaries = {}
+    city_values = {}
+    for city in city_dictionaries:
+        validation_dictionaries[city] = [x for x in city_dictionaries[city] if x["data_type"] == "validation"]
+        if(feature == "real_height"):
+            city_values[city] = [x["real_height"] for x in validation_dictionaries[city]]
+        else:
+            index_of_feature = validation_dictionaries[city][0]["feature_names"].index(feature)
+            city_values[city] = [x["features"][index_of_feature] for x in validation_dictionaries[city]]
+
+    #One threshold for the three cities.
+    all_values = []
+    for city in city_values:
+        all_values.extend(city_values[city])
+    percentile_threshold = np.percentile(all_values, percentile)
+
+    results = {}
+    for city in city_dictionaries:
+        all_features = np.array([x["features"] for x in validation_dictionaries[city]])
+        all_real_heights = [x["real_height"] for x in validation_dictionaries[city]]
+        filtered_indices = get_indices_with_threshold(city_values[city], percentile_threshold, upper = above)
+
+        predictions_ctp = ctp_combined_model.predict(all_features)
+        predictions_footprint = footprint_combined_model.predict(all_features[:, :13])
+
+        delta_all = get_error_differences(predictions_footprint, predictions_ctp, all_real_heights)
+        delta_subgroup = filter_by_indices(delta_all, filtered_indices)
+
+        statistic, p_value = get_wilcoxon(
+            delta_subgroup
+        )
+        results[city] = format_cell(np.mean(delta_subgroup), np.mean(delta_subgroup) - np.mean(delta_all), p_value)
+
+    return results
+
+all_cities_rows = []
+for feature, label in FEATURES[:6]:
+    for above, group in [(True, "Above"), (False, "Below")]:
+        row = {"Feature": label, "Group": group}
+        row.update(run_experiment_1_all_cities(
+            {"Monterrey": data_monterrey, "Boston": data_boston, "San Francisco": data_sanfrancisco},
+            ctp_model_pooled,
+            footprint_model_pooled,
+            feature,
+            75,
+            above = above
+        ))
+        all_cities_rows.append(row)
+
+ALL_CITIES_TABLE_COLUMNS = ["Feature", "Group", "Monterrey", "Boston", "San Francisco"]
+dataframe_dictionary = {column: [x[column] for x in all_cities_rows] for column in ALL_CITIES_TABLE_COLUMNS}
+dataframe_all_cities = pd.DataFrame(data = dataframe_dictionary)
+dataframe_all_cities
+```

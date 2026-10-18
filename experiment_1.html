@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Uriel Legaria">
+
+<title>Experiment 1</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="experiment_1_files/libs/clipboard/clipboard.min.js"></script>
+<script src="experiment_1_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="experiment_1_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="experiment_1_files/libs/quarto-html/popper.min.js"></script>
+<script src="experiment_1_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="experiment_1_files/libs/quarto-html/anchor.min.js"></script>
+<link href="experiment_1_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="experiment_1_files/libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="experiment_1_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="experiment_1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="experiment_1_files/libs/bootstrap/bootstrap-917079515d91bccb85b543faf8aa8bb6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Experiment 1</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Uriel Legaria </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="define-auxiliary-functions" class="level3">
+<h3 class="anchored" data-anchor-id="define-auxiliary-functions">Define auxiliary functions</h3>
+<div id="4de373f5" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> joblib</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> wilcoxon</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Wilcoxon's statistic and p-value</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_wilcoxon(diffs):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    statistic, p_value <span class="op">=</span> wilcoxon(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        diffs,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        alternative <span class="op">=</span> <span class="st">"greater"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> <span class="st">"auto"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> statistic, p_value</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_indices_with_threshold(values, threshold, upper <span class="op">=</span> <span class="va">True</span>):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns the indices of values above or below a threshold (depending on the value of `upper`).</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> []</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(values)):</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> values[i]</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(value <span class="op">&gt;</span> threshold <span class="kw">and</span> upper):</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            indices.append(i)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span>(<span class="kw">not</span> upper <span class="kw">and</span> value <span class="op">&lt;</span> threshold):</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            indices.append(i)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> indices</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> filter_by_indices(values, indices):</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co">    Return only the values at locations indicated in indices.</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    new_values <span class="op">=</span> []</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(values)):</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (i <span class="kw">in</span> indices):</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            new_values.append(values[i])</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_values</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_error_differences(</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        model_1_values,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        model_2_values,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        real_values</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    error_differences <span class="op">=</span> []</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>,<span class="bu">len</span>(real_values)):</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        real_value <span class="op">=</span> real_values[i]</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        value1 <span class="op">=</span> model_1_values[i]</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        value2 <span class="op">=</span> model_2_values[i]</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>        error1 <span class="op">=</span> np.<span class="bu">abs</span>(value1 <span class="op">-</span> real_value)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        error2 <span class="op">=</span> np.<span class="bu">abs</span>(value2 <span class="op">-</span> real_value)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        error_difference <span class="op">=</span> error1 <span class="op">-</span> error2</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        error_differences.append(error_difference)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> error_differences</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="load-the-models" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-models">Load the models</h3>
+<div id="6b234e26" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Necessary paths</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>PATH_CTP_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ctp_model_pooled <span class="op">=</span> joblib.load(PATH_CTP_POOLED)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>PATH_CTP_MONTERREY <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_monterrey.pkl"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ctp_model_monterrey <span class="op">=</span> joblib.load(PATH_CTP_MONTERREY)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>PATH_CTP_BOSTON <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_boston.pkl"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ctp_model_boston <span class="op">=</span> joblib.load(PATH_CTP_BOSTON)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>PATH_CTP_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ctp_model_san_francisco <span class="op">=</span> joblib.load(PATH_CTP_SF)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>footprint_model_pooled <span class="op">=</span> joblib.load(PATH_FOOTPRINT_POOLED)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_MONTERREY <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>footprint_model_monterrey <span class="op">=</span> joblib.load(PATH_FOOTPRINT_MONTERREY)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_BOSTON <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>footprint_model_boston <span class="op">=</span> joblib.load(PATH_FOOTPRINT_BOSTON)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>footprint_model_san_francisco <span class="op">=</span> joblib.load(PATH_FOOTPRINT_SF)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="define-the-experiment-function" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-experiment-function">Define the experiment function</h3>
+<div id="e1e95bbc" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This experiment applies the experiment to get one of the rows.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_1(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    dictionaries,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    ctp_city_model,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ctp_combined_model,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    footprint_city_model,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    footprint_combined_model,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    feature,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    percentile,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    above <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    FEATURE_NAMES <span class="op">=</span> dictionaries[<span class="dv">0</span>][<span class="st">"feature_names"</span>]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> dictionaries <span class="cf">if</span> x[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"validation"</span>]</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    all_features <span class="op">=</span> [x[<span class="st">"features"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">#The reference height is not one of the features, so it is read from real_height.</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(feature <span class="op">==</span> <span class="st">"real_height"</span>):</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        all_values <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries]</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        index_of_feature <span class="op">=</span> FEATURE_NAMES.index(feature)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        all_values <span class="op">=</span> [x[<span class="st">"features"</span>][index_of_feature] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    all_real_heights <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries]</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    percentile_threshold <span class="op">=</span> np.percentile(all_values, percentile)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    filtered_indices <span class="op">=</span> get_indices_with_threshold(</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        all_values,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        percentile_threshold,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        upper <span class="op">=</span> above</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Filter the features</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    filtered_features <span class="op">=</span> filter_by_indices(</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        all_features,</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        filtered_indices</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Filtered ground truths</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    filtered_real_heights <span class="op">=</span> filter_by_indices(</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        all_real_heights,</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        filtered_indices</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_city_model <span class="op">=</span> ctp_city_model.predict(np.array(all_features))</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_city_model_subgroup <span class="op">=</span> ctp_city_model.predict(np.array(filtered_features))</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_combined_model <span class="op">=</span> ctp_combined_model.predict(np.array(all_features))</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_combined_model_subgroup <span class="op">=</span> ctp_combined_model.predict(np.array(filtered_features))</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">#The footprint models only use the 13 footprint features, which come first.</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    predictions_footprint_city_model <span class="op">=</span> footprint_city_model.predict(np.array(all_features)[:, :<span class="dv">13</span>])</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    predictions_footprint_city_model_subgroup <span class="op">=</span> footprint_city_model.predict(np.array(filtered_features)[:, :<span class="dv">13</span>])</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    predictions_footprint_combined_model <span class="op">=</span> footprint_combined_model.predict(np.array(all_features)[:, :<span class="dv">13</span>])</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    predictions_footprint_combined_model_subgroup <span class="op">=</span> footprint_combined_model.predict(np.array(filtered_features)[:, :<span class="dv">13</span>])</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    delta_all <span class="op">=</span> get_error_differences(predictions_ctp_city_model, predictions_ctp_combined_model, all_real_heights)</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    delta_subgroup <span class="op">=</span> get_error_differences(predictions_ctp_city_model_subgroup, predictions_ctp_combined_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"CTP_city - CTP_comb - delta subgroup"</span>] <span class="op">=</span>np.mean(delta_subgroup)</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"CTP_city - CTP_comb - gain"</span>] <span class="op">=</span> np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all)</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>        delta_subgroup</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"CTP_city - CTP_comb - wilcoxon p"</span>] <span class="op">=</span>  p_value</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Footprint city model against footprint combined model.</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    delta_all <span class="op">=</span> get_error_differences(predictions_footprint_city_model, predictions_footprint_combined_model, all_real_heights)</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    delta_subgroup <span class="op">=</span> get_error_differences(predictions_footprint_city_model_subgroup, predictions_footprint_combined_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - Footprint_comb - delta subgroup"</span>] <span class="op">=</span> np.mean(delta_subgroup)</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - Footprint_comb - gain"</span>] <span class="op">=</span> np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all)</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>        delta_subgroup</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - Footprint_comb - wilcoxon p"</span>] <span class="op">=</span> p_value</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Footprint city model against CTP city model.</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    delta_all <span class="op">=</span> get_error_differences(predictions_footprint_city_model, predictions_ctp_city_model, all_real_heights)</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    delta_subgroup <span class="op">=</span> get_error_differences(predictions_footprint_city_model_subgroup, predictions_ctp_city_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - CTP_city - delta subgroup"</span>] <span class="op">=</span> np.mean(delta_subgroup)</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - CTP_city - gain"</span>] <span class="op">=</span> np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    <span class="co">#The test asks whether the footprint model has the lower error, so it runs on CTP minus footprint.</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>        get_error_differences(predictions_ctp_city_model_subgroup, predictions_footprint_city_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_city - CTP_city - wilcoxon p"</span>] <span class="op">=</span> p_value</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Footprint combined model against CTP combined model.</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>    delta_all <span class="op">=</span> get_error_differences(predictions_footprint_combined_model, predictions_ctp_combined_model, all_real_heights)</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>    delta_subgroup <span class="op">=</span> get_error_differences(predictions_footprint_combined_model_subgroup, predictions_ctp_combined_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_comb - CTP_comb - delta subgroup"</span>] <span class="op">=</span> np.mean(delta_subgroup)</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_comb - CTP_comb - gain"</span>] <span class="op">=</span> np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all)</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    <span class="co">#The test asks whether the footprint model has the lower error, so it runs on CTP minus footprint.</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>        get_error_differences(predictions_ctp_combined_model_subgroup, predictions_footprint_combined_model_subgroup, filtered_real_heights)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Footprint_comb - CTP_comb - wilcoxon p"</span>] <span class="op">=</span> p_value</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="open-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="open-the-data">Open the data</h3>
+<div id="336ce1d9" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DATA_PATH <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_PATH<span class="sc">}</span><span class="ss">/data_monterrey.json"</span>) <span class="im">as</span> f:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    data_monterrey <span class="op">=</span> json.load(f)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_PATH<span class="sc">}</span><span class="ss">/data_boston.json"</span>) <span class="im">as</span> f:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    data_boston <span class="op">=</span> json.load(f)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_PATH<span class="sc">}</span><span class="ss">/data_sanfrancisco.json"</span>) <span class="im">as</span> f:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    data_sanfrancisco <span class="op">=</span> json.load(f)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="building-the-table-rows" class="level3">
+<h3 class="anchored" data-anchor-id="building-the-table-rows">Building the table rows</h3>
+<p>Each cell shows the subgroup delta, its stars, and the gain, as in the paper.</p>
+<div id="0569d36f" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"real_height"</span>, <span class="st">"Reference height"</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"building_height"</span>, <span class="st">"Street-view height"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"complexity"</span>, <span class="st">"Footprint complexity"</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"isoperimetric_quotient"</span>, <span class="st">"Compactness"</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"material_pct_leaf"</span>, <span class="st">"Facade vegetation"</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"mean_distance_to_neighbors"</span>, <span class="st">"Mean neighbour distance"</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"nearest_neighbor_distance"</span>, <span class="st">"Nearest neighbour distance"</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"n_vertices"</span>, <span class="st">"Number of vertices"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>COMPARISONS <span class="op">=</span> [</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"CTP_city - CTP_comb"</span>, <span class="st">"C_city - C_comb"</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Footprint_city - Footprint_comb"</span>, <span class="st">"F_city - F_comb"</span>),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Footprint_city - CTP_city"</span>, <span class="st">"F_city - C_city"</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"Footprint_comb - CTP_comb"</span>, <span class="st">"F_comb - C_comb"</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_stars(p_value):</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(p_value <span class="op">&lt;</span> <span class="fl">0.001</span>):</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"***"</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span>(p_value <span class="op">&lt;</span> <span class="fl">0.01</span>):</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"**"</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span>(p_value <span class="op">&lt;</span> <span class="fl">0.05</span>):</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"*"</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">""</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> format_value(value):</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>value<span class="sc">:+.2f}</span><span class="ss">"</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(text <span class="kw">in</span> [<span class="st">"+0.00"</span>, <span class="st">"-0.00"</span>]):</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"0.00"</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> format_cell(delta, gain, p_value):</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"</span><span class="sc">{</span>format_value(delta)<span class="sc">}{</span>get_stars(p_value)<span class="sc">}</span><span class="ss"> / </span><span class="sc">{</span>format_value(gain)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_city_rows(dictionaries, ctp_city_model, footprint_city_model):</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> []</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> feature, label <span class="kw">in</span> FEATURES:</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> above, group <span class="kw">in</span> [(<span class="va">True</span>, <span class="st">"Above"</span>), (<span class="va">False</span>, <span class="st">"Below"</span>)]:</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> run_experiment_1(</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>                dictionaries,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>                ctp_city_model,</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>                ctp_model_pooled,</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>                footprint_city_model,</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>                footprint_model_pooled,</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>                feature,</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>                <span class="dv">75</span>,</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>                above <span class="op">=</span> above</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>            row <span class="op">=</span> {<span class="st">"Feature"</span>: label, <span class="st">"Group"</span>: group}</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> key, column <span class="kw">in</span> COMPARISONS:</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>                row[column] <span class="op">=</span> format_cell(</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>                    results[key <span class="op">+</span> <span class="st">" - delta subgroup"</span>],</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>                    results[key <span class="op">+</span> <span class="st">" - gain"</span>],</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>                    results[key <span class="op">+</span> <span class="st">" - wilcoxon p"</span>]</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>            rows.append(row)</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rows</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>CITY_TABLE_COLUMNS <span class="op">=</span> [<span class="st">"Feature"</span>, <span class="st">"Group"</span>] <span class="op">+</span> [column <span class="cf">for</span> key, column <span class="kw">in</span> COMPARISONS]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="monterrey-table" class="level3">
+<h3 class="anchored" data-anchor-id="monterrey-table">Monterrey table</h3>
+<div id="0065f4ba" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>monterrey_rows <span class="op">=</span> get_city_rows(data_monterrey, ctp_model_monterrey, footprint_model_monterrey)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> monterrey_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>dataframe_monterrey <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>dataframe_monterrey</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Feature</th>
+<th data-quarto-table-cell-role="th">Group</th>
+<th data-quarto-table-cell-role="th">C_city - C_comb</th>
+<th data-quarto-table-cell-role="th">F_city - F_comb</th>
+<th data-quarto-table-cell-role="th">F_city - C_city</th>
+<th data-quarto-table-cell-role="th">F_comb - C_comb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Reference height</td>
+<td>Above</td>
+<td>+0.17*** / +0.33</td>
+<td>+0.27*** / +0.40</td>
+<td>+0.28 / +0.18</td>
+<td>+0.19 / +0.11</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Reference height</td>
+<td>Below</td>
+<td>-0.27 / -0.11</td>
+<td>-0.27 / -0.13</td>
+<td>+0.04 / -0.06</td>
+<td>+0.04 / -0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Street-view height</td>
+<td>Above</td>
+<td>-0.12 / +0.04</td>
+<td>-0.10 / +0.03</td>
+<td>+0.14 / +0.03</td>
+<td>+0.12 / +0.04</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Street-view height</td>
+<td>Below</td>
+<td>-0.18 / -0.01</td>
+<td>-0.15 / -0.01</td>
+<td>+0.09 / -0.01</td>
+<td>+0.07 / -0.01</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Footprint complexity</td>
+<td>Above</td>
+<td>-0.04 / +0.12</td>
+<td>-0.03 / +0.11</td>
+<td>+0.07 / -0.03</td>
+<td>+0.06 / -0.02</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>Footprint complexity</td>
+<td>Below</td>
+<td>-0.20 / -0.04</td>
+<td>-0.17 / -0.04</td>
+<td>+0.11 / +0.01</td>
+<td>+0.08 / +0.01</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>Compactness</td>
+<td>Above</td>
+<td>-0.10 / +0.06</td>
+<td>-0.03 / +0.11</td>
+<td>+0.08 / -0.03</td>
+<td>0.00 / -0.08</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>Compactness</td>
+<td>Below</td>
+<td>-0.18 / -0.02</td>
+<td>-0.17 / -0.04</td>
+<td>+0.11 / +0.01</td>
+<td>+0.10 / +0.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>Facade vegetation</td>
+<td>Above</td>
+<td>-0.21 / -0.05</td>
+<td>-0.09 / +0.04</td>
+<td>+0.09 / -0.02</td>
+<td>-0.03 / -0.10</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>Facade vegetation</td>
+<td>Below</td>
+<td>-0.15 / +0.02</td>
+<td>-0.15 / -0.01</td>
+<td>+0.11 / +0.01</td>
+<td>+0.11 / +0.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>Mean neighbour distance</td>
+<td>Above</td>
+<td>-0.35 / -0.19</td>
+<td>-0.33 / -0.19</td>
+<td>+0.17 / +0.07</td>
+<td>+0.15 / +0.07</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>Mean neighbour distance</td>
+<td>Below</td>
+<td>-0.10 / +0.06</td>
+<td>-0.07 / +0.06</td>
+<td>+0.08 / -0.02</td>
+<td>+0.06 / -0.02</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">12</th>
+<td>Nearest neighbour distance</td>
+<td>Above</td>
+<td>-0.28 / -0.12</td>
+<td>-0.27 / -0.13</td>
+<td>+0.21 / +0.10</td>
+<td>+0.19 / +0.11</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">13</th>
+<td>Nearest neighbour distance</td>
+<td>Below</td>
+<td>-0.12 / +0.04</td>
+<td>-0.09 / +0.04</td>
+<td>+0.07 / -0.03</td>
+<td>+0.04 / -0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">14</th>
+<td>Number of vertices</td>
+<td>Above</td>
+<td>-0.45 / -0.29</td>
+<td>-0.60 / -0.46</td>
+<td>+0.07 / -0.04</td>
+<td>+0.22 / +0.14</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">15</th>
+<td>Number of vertices</td>
+<td>Below</td>
+<td>-0.09 / +0.07</td>
+<td>-0.01 / +0.13</td>
+<td>+0.12 / +0.01</td>
+<td>+0.04 / -0.04</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="boston-table" class="level3">
+<h3 class="anchored" data-anchor-id="boston-table">Boston table</h3>
+<div id="95e6054c" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>boston_rows <span class="op">=</span> get_city_rows(data_boston, ctp_model_boston, footprint_model_boston)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> boston_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>dataframe_boston <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>dataframe_boston</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Feature</th>
+<th data-quarto-table-cell-role="th">Group</th>
+<th data-quarto-table-cell-role="th">C_city - C_comb</th>
+<th data-quarto-table-cell-role="th">F_city - F_comb</th>
+<th data-quarto-table-cell-role="th">F_city - C_city</th>
+<th data-quarto-table-cell-role="th">F_comb - C_comb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Reference height</td>
+<td>Above</td>
+<td>-0.58 / -0.48</td>
+<td>-1.17 / -0.98</td>
+<td>+0.53 / +0.23</td>
+<td>+1.12 / +0.74</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Reference height</td>
+<td>Below</td>
+<td>+0.06 / +0.16</td>
+<td>+0.14*** / +0.33</td>
+<td>+0.22 / -0.08</td>
+<td>+0.14 / -0.24</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Street-view height</td>
+<td>Above</td>
+<td>-0.23 / -0.13</td>
+<td>-0.36 / -0.18</td>
+<td>+0.27 / -0.03</td>
+<td>+0.41 / +0.02</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Street-view height</td>
+<td>Below</td>
+<td>-0.06 / +0.04</td>
+<td>-0.13 / +0.06</td>
+<td>+0.31 / +0.01</td>
+<td>+0.38 / -0.01</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Footprint complexity</td>
+<td>Above</td>
+<td>-0.05 / +0.05</td>
+<td>0.00 / +0.19</td>
+<td>+0.23 / -0.07</td>
+<td>+0.18 / -0.21</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>Footprint complexity</td>
+<td>Below</td>
+<td>-0.12 / -0.02</td>
+<td>-0.25 / -0.06</td>
+<td>+0.32 / +0.02</td>
+<td>+0.46 / +0.07</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>Compactness</td>
+<td>Above</td>
+<td>-0.03 / +0.07</td>
+<td>-0.10 / +0.08</td>
+<td>+0.33 / +0.03</td>
+<td>+0.40 / +0.01</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>Compactness</td>
+<td>Below</td>
+<td>-0.12 / -0.02</td>
+<td>-0.21 / -0.03</td>
+<td>+0.29 / -0.01</td>
+<td>+0.38 / 0.00</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>Facade vegetation</td>
+<td>Above</td>
+<td>-0.23 / -0.13</td>
+<td>-0.32 / -0.13</td>
+<td>+0.14 / -0.16</td>
+<td>+0.23 / -0.16</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>Facade vegetation</td>
+<td>Below</td>
+<td>-0.06 / +0.04</td>
+<td>-0.14 / +0.05</td>
+<td>+0.35 / +0.05</td>
+<td>+0.44 / +0.05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>Mean neighbour distance</td>
+<td>Above</td>
+<td>-0.10 / 0.00</td>
+<td>-0.23 / -0.04</td>
+<td>+0.63 / +0.33</td>
+<td>+0.76 / +0.38</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>Mean neighbour distance</td>
+<td>Below</td>
+<td>-0.10 / 0.00</td>
+<td>-0.17 / +0.01</td>
+<td>+0.19 / -0.11</td>
+<td>+0.26 / -0.12</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">12</th>
+<td>Nearest neighbour distance</td>
+<td>Above</td>
+<td>-0.10 / 0.00</td>
+<td>-0.17 / +0.02</td>
+<td>+0.63 / +0.33</td>
+<td>+0.70 / +0.31</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">13</th>
+<td>Nearest neighbour distance</td>
+<td>Below</td>
+<td>-0.10 / 0.00</td>
+<td>-0.19 / -0.01</td>
+<td>+0.19 / -0.11</td>
+<td>+0.28 / -0.10</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">14</th>
+<td>Number of vertices</td>
+<td>Above</td>
+<td>-0.16 / -0.06</td>
+<td>-0.23 / -0.04</td>
+<td>+0.22 / -0.08</td>
+<td>+0.29 / -0.10</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">15</th>
+<td>Number of vertices</td>
+<td>Below</td>
+<td>-0.08 / +0.02</td>
+<td>-0.18 / +0.01</td>
+<td>+0.34 / +0.04</td>
+<td>+0.44 / +0.05</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="san-francisco-table" class="level3">
+<h3 class="anchored" data-anchor-id="san-francisco-table">San Francisco table</h3>
+<div id="0a706f6a" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>san_francisco_rows <span class="op">=</span> get_city_rows(data_sanfrancisco, ctp_model_san_francisco, footprint_model_san_francisco)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> san_francisco_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>dataframe_san_francisco <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>dataframe_san_francisco</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Feature</th>
+<th data-quarto-table-cell-role="th">Group</th>
+<th data-quarto-table-cell-role="th">C_city - C_comb</th>
+<th data-quarto-table-cell-role="th">F_city - F_comb</th>
+<th data-quarto-table-cell-role="th">F_city - C_city</th>
+<th data-quarto-table-cell-role="th">F_comb - C_comb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Reference height</td>
+<td>Above</td>
+<td>-0.17 / -0.10</td>
+<td>-0.16 / -0.03</td>
+<td>+0.40 / +0.16</td>
+<td>+0.38 / +0.09</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Reference height</td>
+<td>Below</td>
+<td>-0.04 / +0.03</td>
+<td>-0.12 / +0.01</td>
+<td>+0.18 / -0.05</td>
+<td>+0.26 / -0.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Street-view height</td>
+<td>Above</td>
+<td>-0.09 / -0.02</td>
+<td>-0.20 / -0.08</td>
+<td>+0.19 / -0.05</td>
+<td>+0.30 / +0.01</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Street-view height</td>
+<td>Below</td>
+<td>-0.06 / +0.01</td>
+<td>-0.10 / +0.03</td>
+<td>+0.25 / +0.02</td>
+<td>+0.29 / 0.00</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Footprint complexity</td>
+<td>Above</td>
+<td>-0.06 / +0.01</td>
+<td>-0.02 / +0.10</td>
+<td>+0.22 / -0.01</td>
+<td>+0.18 / -0.11</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>Footprint complexity</td>
+<td>Below</td>
+<td>-0.07 / 0.00</td>
+<td>-0.16 / -0.03</td>
+<td>+0.24 / 0.00</td>
+<td>+0.33 / +0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>Compactness</td>
+<td>Above</td>
+<td>-0.14 / -0.07</td>
+<td>-0.09 / +0.04</td>
+<td>+0.24 / 0.00</td>
+<td>+0.18 / -0.11</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>Compactness</td>
+<td>Below</td>
+<td>-0.04 / +0.02</td>
+<td>-0.14 / -0.01</td>
+<td>+0.23 / 0.00</td>
+<td>+0.33 / +0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>Facade vegetation</td>
+<td>Above</td>
+<td>-0.03 / +0.04</td>
+<td>0.00 / +0.13</td>
+<td>+0.09 / -0.14</td>
+<td>+0.06 / -0.23</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>Facade vegetation</td>
+<td>Below</td>
+<td>-0.08 / -0.01</td>
+<td>-0.17 / -0.04</td>
+<td>+0.28 / +0.05</td>
+<td>+0.37 / +0.08</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>Mean neighbour distance</td>
+<td>Above</td>
+<td>-0.09 / -0.02</td>
+<td>-0.23 / -0.10</td>
+<td>+0.35 / +0.12</td>
+<td>+0.50 / +0.21</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>Mean neighbour distance</td>
+<td>Below</td>
+<td>-0.06 / +0.01</td>
+<td>-0.09 / +0.03</td>
+<td>+0.19 / -0.04</td>
+<td>+0.22 / -0.07</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">12</th>
+<td>Nearest neighbour distance</td>
+<td>Above</td>
+<td>-0.04 / +0.03</td>
+<td>-0.14 / -0.02</td>
+<td>+0.32 / +0.09</td>
+<td>+0.43 / +0.14</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">13</th>
+<td>Nearest neighbour distance</td>
+<td>Below</td>
+<td>-0.08 / -0.01</td>
+<td>-0.12 / +0.01</td>
+<td>+0.20 / -0.03</td>
+<td>+0.24 / -0.05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">14</th>
+<td>Number of vertices</td>
+<td>Above</td>
+<td>-0.04 / +0.03</td>
+<td>-0.14 / -0.01</td>
+<td>+0.29 / +0.05</td>
+<td>+0.39 / +0.10</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">15</th>
+<td>Number of vertices</td>
+<td>Below</td>
+<td>-0.08 / -0.01</td>
+<td>-0.12 / 0.00</td>
+<td>+0.22 / -0.01</td>
+<td>+0.26 / -0.03</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="all-cities-table" class="level3">
+<h3 class="anchored" data-anchor-id="all-cities-table">All cities table</h3>
+<p>The threshold comes from the validation buildings of the three cities together. Each cell compares the combined footprint model with the combined CTP model, and the stars test whether the CTP model has the lower error.</p>
+<div id="95c80abc" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_1_all_cities(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    city_dictionaries,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ctp_combined_model,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    footprint_combined_model,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    feature,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    percentile,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    above <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Validation buildings and feature values of each city.</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries <span class="op">=</span> {}</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    city_values <span class="op">=</span> {}</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        validation_dictionaries[city] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> city_dictionaries[city] <span class="cf">if</span> x[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"validation"</span>]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(feature <span class="op">==</span> <span class="st">"real_height"</span>):</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            index_of_feature <span class="op">=</span> validation_dictionaries[city][<span class="dv">0</span>][<span class="st">"feature_names"</span>].index(feature)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"features"</span>][index_of_feature] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">#One threshold for the three cities.</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    all_values <span class="op">=</span> []</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_values:</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        all_values.extend(city_values[city])</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    percentile_threshold <span class="op">=</span> np.percentile(all_values, percentile)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        all_features <span class="op">=</span> np.array([x[<span class="st">"features"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]])</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        all_real_heights <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        filtered_indices <span class="op">=</span> get_indices_with_threshold(city_values[city], percentile_threshold, upper <span class="op">=</span> above)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        predictions_ctp <span class="op">=</span> ctp_combined_model.predict(all_features)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        predictions_footprint <span class="op">=</span> footprint_combined_model.predict(all_features[:, :<span class="dv">13</span>])</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        delta_all <span class="op">=</span> get_error_differences(predictions_footprint, predictions_ctp, all_real_heights)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        delta_subgroup <span class="op">=</span> filter_by_indices(delta_all, filtered_indices)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            delta_subgroup</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        results[city] <span class="op">=</span> format_cell(np.mean(delta_subgroup), np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all), p_value)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>all_cities_rows <span class="op">=</span> []</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> feature, label <span class="kw">in</span> FEATURES[:<span class="dv">6</span>]:</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> above, group <span class="kw">in</span> [(<span class="va">True</span>, <span class="st">"Above"</span>), (<span class="va">False</span>, <span class="st">"Below"</span>)]:</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> {<span class="st">"Feature"</span>: label, <span class="st">"Group"</span>: group}</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        row.update(run_experiment_1_all_cities(</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"Monterrey"</span>: data_monterrey, <span class="st">"Boston"</span>: data_boston, <span class="st">"San Francisco"</span>: data_sanfrancisco},</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>            ctp_model_pooled,</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>            footprint_model_pooled,</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>            feature,</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>            <span class="dv">75</span>,</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>            above <span class="op">=</span> above</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        all_cities_rows.append(row)</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>ALL_CITIES_TABLE_COLUMNS <span class="op">=</span> [<span class="st">"Feature"</span>, <span class="st">"Group"</span>, <span class="st">"Monterrey"</span>, <span class="st">"Boston"</span>, <span class="st">"San Francisco"</span>]</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> all_cities_rows] <span class="cf">for</span> column <span class="kw">in</span> ALL_CITIES_TABLE_COLUMNS}</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Feature</th>
+<th data-quarto-table-cell-role="th">Group</th>
+<th data-quarto-table-cell-role="th">Monterrey</th>
+<th data-quarto-table-cell-role="th">Boston</th>
+<th data-quarto-table-cell-role="th">San Francisco</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>Reference height</td>
+<td>Above</td>
+<td>+1.53** / +1.45</td>
+<td>+0.74*** / +0.35</td>
+<td>+0.24*** / -0.05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>Reference height</td>
+<td>Below</td>
+<td>+0.05*** / -0.03</td>
+<td>+0.17*** / -0.22</td>
+<td>+0.32*** / +0.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>Street-view height</td>
+<td>Above</td>
+<td>+0.15 / +0.07</td>
+<td>+0.36*** / -0.02</td>
+<td>+0.26*** / -0.03</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>Street-view height</td>
+<td>Below</td>
+<td>+0.07*** / 0.00</td>
+<td>+0.40*** / +0.01</td>
+<td>+0.30*** / +0.01</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>Footprint complexity</td>
+<td>Above</td>
+<td>+0.04* / -0.04</td>
+<td>+0.22*** / -0.17</td>
+<td>+0.18*** / -0.11</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>Footprint complexity</td>
+<td>Below</td>
+<td>+0.10*** / +0.02</td>
+<td>+0.42*** / +0.03</td>
+<td>+0.33*** / +0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>Compactness</td>
+<td>Above</td>
+<td>+0.05* / -0.03</td>
+<td>+0.54*** / +0.15</td>
+<td>+0.11 / -0.18</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>Compactness</td>
+<td>Below</td>
+<td>+0.10*** / +0.02</td>
+<td>+0.35*** / -0.03</td>
+<td>+0.32*** / +0.03</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>Facade vegetation</td>
+<td>Above</td>
+<td>-0.01 / -0.09</td>
+<td>+0.22*** / -0.17</td>
+<td>+0.09 / -0.20</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>Facade vegetation</td>
+<td>Below</td>
+<td>+0.11*** / +0.03</td>
+<td>+0.47*** / +0.08</td>
+<td>+0.33*** / +0.04</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>Mean neighbour distance</td>
+<td>Above</td>
+<td>+0.16** / +0.08</td>
+<td>+0.72*** / +0.34</td>
+<td>+0.55*** / +0.26</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>Mean neighbour distance</td>
+<td>Below</td>
+<td>+0.05*** / -0.03</td>
+<td>+0.26*** / -0.12</td>
+<td>+0.22*** / -0.07</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
