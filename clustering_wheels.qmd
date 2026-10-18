@@ -1,0 +1,691 @@
+---
+title: Clustering Wheels
+author: Uriel Legaria
+jupyter: imageable
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+Our wheel visualization summarizes the following properties per-cluster:
+
+1. Building height (ground truth)
+2. RMSE-gain (against the single XGBoost model).
+3. City that contributes the highest share of validation instances for each of the cluster + the percentage.
+4. Dominant facade material.
+5. Representative footprint and street view image. 
+
+### Opening the data
+First let's open the ground truth data.
+```{python}
+from pathlib import Path
+import geopandas as gpd
+import numpy as np
+from imageable.visualization.wheel_visualization import WheelElement, WheelVisualization
+import pandas as pd
+import ast
+import json
+import joblib
+import cmcrameri.cm as cmc
+from PIL import Image
+
+#The data path
+SRC_DATA_PATH = Path("/Users/legariapena.j/Library/CloudStorage/GoogleDrive-legariapena.j@husky.neu.edu/Shared drives/Cool and Carbon Free Africa/Building Image Datasets/data")
+
+SRC_DATA_PATH_SAN_FRANCISCO = Path("/Users/legariapena.j/Documents/imageable-2026/imageable/data/sanfrancisco_data")
+
+#Ground truth Boston 
+GROUND_TRUTH_BOSTON_PATH = SRC_DATA_PATH/"boston"/"footprints"/"labelled_buildings_meters.geojson"
+ground_truth_boston = gpd.read_file(GROUND_TRUTH_BOSTON_PATH)
+
+#Ground truth Monterrey
+GROUND_TRUTH_MONTERREY_PATH = SRC_DATA_PATH/"monterrey"/"footprints"/"labelled_buildings_expanded.geojson"
+ground_truth_monterrey = gpd.read_file(GROUND_TRUTH_MONTERREY_PATH)
+
+#Ground truth San Francisco
+GROUND_TRUTH_SAN_FRANCISCO_PATH = SRC_DATA_PATH_SAN_FRANCISCO/"footprints"/"Building_Footprints_sample_10000.geojson"
+ground_truth_san_francisco = gpd.read_file(GROUND_TRUTH_SAN_FRANCISCO_PATH)
+
+ground_truth_san_francisco.head(5)
+```
+
+Now let's open the results obtained by applying Imageable to each city. 
+
+```{python}
+batches_names = ["1-1000","1000-2000","2000-3000", "3000-4000", "4000-5000", "5000-6000", "6000-7000", "7000=8000", "8000-9000", "9000-10000"]
+
+#Open Monterrey batches. 
+monterrey_geojsons = {}
+for i in [0, 1, 2, 3, 4, 5, 20, 21, 22, 23, 24, 25, 26]:
+    if(i == 0):
+        first_index = i*1000+1
+    else:
+        first_index = i*1000
+
+    second_index = (i+1)*1000
+    first_string = "Images "+f"{first_index} - {second_index}"
+    file_path = SRC_DATA_PATH/"monterrey_dedup"/first_string/f"building_data_{first_index}_{second_index}.geojson"
+    monterrey_geojsons[f"{first_index}-{second_index}"] = gpd.read_file(file_path)
+
+#Merge all batches into a single GDF
+gdf_monterrey = gpd.GeoDataFrame(
+    pd.concat(monterrey_geojsons, ignore_index=True),
+    crs = monterrey_geojsons[list(monterrey_geojsons.keys())[0]].crs
+)
+
+#Open the Boston batches. 
+boston_geojsons = {}
+for i in range(10):
+    if(i == 0):
+        first_index = i*1000+1
+    else:
+        first_index = i*1000
+
+    second_index = (i+1)*1000
+    first_string = "Images "+f"{first_index} - {second_index}"
+    file_path = SRC_DATA_PATH/"boston"/first_string/f"building_data_{first_index}_{second_index}.geojson"
+    boston_geojsons[batches_names[i]] = gpd.read_file(file_path)
+#Merge all batches into a single GDF.
+gdf_boston = gpd.GeoDataFrame(
+    pd.concat(boston_geojsons, ignore_index = True),
+    crs = boston_geojsons[list(boston_geojsons.keys())[0]].crs)
+
+#For SF there's a single Geodataframe.
+SAN_FRANCISCO_BUILDINGS_PATH = SRC_DATA_PATH_SAN_FRANCISCO/"labelled_footprints"/"san_francisco_results.geojson"
+gdf_san_francisco = gpd.read_file(SAN_FRANCISCO_BUILDINGS_PATH)
+
+#For Monterrey keep only the rows that have a ground truth value.
+ground_truth_monterrey = ground_truth_monterrey.set_index("building_id")
+has_height = gdf_monterrey["building_id"].isin(ground_truth_monterrey.index)
+gdf_monterrey = gdf_monterrey[has_height]
+
+#Number the rows as in the three-city training matrix: Monterrey, then Boston, then San Francisco.
+n_monterrey = len(gdf_monterrey)
+n_boston = len(gdf_boston)
+gdf_monterrey.index = range(0, n_monterrey)
+gdf_boston.index = range(n_monterrey, n_monterrey + n_boston)
+gdf_san_francisco.index = range(n_monterrey + n_boston, n_monterrey + n_boston + len(gdf_san_francisco))
+
+#I think we can merge all the GDF's at this point.
+gdf_all = gpd.GeoDataFrame(
+    pd.concat([gdf_monterrey, gdf_boston, gdf_san_francisco], ignore_index = True), 
+    crs = gdf_boston.crs
+)
+
+gdf_all.head(5)
+```
+
+### Expand the material columns
+
+Let's expand the material dictionaries into multiple columns.
+```{python}
+#Define a function to expand the materials.
+def expand_materials(gdf):
+    #This would be a list of dictionaries.
+    materials = list(gdf["material_percentages"])
+    materials = [ast.literal_eval(x) for x in materials]
+
+    ALL_MATERIALS = ["asphalt","concrete","metal","road_marking","fabric_leather","glass","plaster", "plastic","rubber","sand", "gravel","ceramic","cobblestone","brick","grass","wood","leaf","water","human_body","sky"]
+
+    BASE_STR = "material_pct_"
+    #These would be all the materials
+    keys = ALL_MATERIALS
+
+    for i in range(len(keys)):
+        material_name = keys[i]
+
+        column_name = BASE_STR+material_name
+        column_values = []
+        for m in materials:
+            #Case where the dictionary is empty
+            if(not m):
+                column_values.append(None)
+            #Case where there is a percentages option in m (need to check why this happens)
+            elif(material_name not in m and "percentages" in m and material_name in m["percentages"]):
+                column_values.append(m["percentages"][material_name])
+            #Case where the dictionary just has materials: percentage.
+            elif(material_name in m):
+                column_values.append(m[material_name])
+            else:
+                print(m)
+                print(material_name)
+
+        gdf[column_name] = column_values
+
+    return gdf
+```
+
+Now let's apply the function to the per-city GDFs and the pooled one.
+
+```{python}
+gdf_monterrey = expand_materials(gdf_monterrey)
+gdf_boston = expand_materials(gdf_boston)
+gdf_san_francisco = expand_materials(gdf_san_francisco)
+gdf_all = expand_materials(gdf_all)
+
+BASE_WORD = "material_pct_"
+MATERIALS_TO_SHOW = ["brick", "grass", "wood"]
+MATERIALS_TO_SHOW_LIST = [BASE_WORD+x for x in MATERIALS_TO_SHOW]
+gdf_all[MATERIALS_TO_SHOW_LIST].head(5)
+```
+
+### Open the building dictionaries
+
+We need to tag the following properties:
+
+1. City
+2. Cluster of each instance.
+3. Possibly path to image, but I need to remember how to reconstruct that. 
+
+```{python}
+DICTIONARIES_PATH = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_pooled_3_cities.json"
+
+with open(DICTIONARIES_PATH, "r") as f:
+    data_dictionaries = json.load(f)
+
+def get_index_mapping(property):
+    return {
+        int(d["index"]): d[property] for d in data_dictionaries if not d[property] is None}
+
+#Mapping the GDF indices to properties in the dictionaries
+index_to_real_height = get_index_mapping("real_height")
+index_to_city = get_index_mapping("city")
+index_to_cluster = get_index_mapping("cluster")
+index_to_validation = get_index_mapping("data_type")
+index_to_features = get_index_mapping("features")
+
+#Add the dictionary properties to every GDF.
+for gdf in [gdf_all, gdf_monterrey, gdf_boston, gdf_san_francisco]:
+    gdf["real_height"] = gdf.index.map(index_to_real_height)
+    gdf["city"] = gdf.index.map(index_to_city)
+    gdf["cluster"] = gdf.index.map(index_to_cluster)
+    gdf["data_type"] = gdf.index.map(index_to_validation)
+
+#The city GDFs take their clusters from the city models.
+for gdf, city in [(gdf_monterrey, "monterrey"), (gdf_boston, "boston"), (gdf_san_francisco, "sanfrancisco")]:
+    with open(f"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/data_{city}.json", "r") as f:
+        city_dictionaries = json.load(f)
+    gdf["cluster"] = gdf.index.map({int(d["index"]): d["cluster"] for d in city_dictionaries})
+
+#Path to the street view image of each building.
+def get_image_path(city, building_id):
+    n = int(building_id.split("_")[-1])
+    if city == "San Francisco":
+        start = (n//1000)*1000
+        return SRC_DATA_PATH_SAN_FRANCISCO/"images"/f"Images_{float(start)}_{float(start + 1000)}"/building_id/"image.jpg"
+    batch = (n - 1)//1000
+    folder = f"Images {batch*1000 if batch > 0 else 1} - {(batch + 1)*1000}"
+    return SRC_DATA_PATH/city.lower()/folder/building_id/"image.jpg"
+
+for gdf in [gdf_all, gdf_monterrey, gdf_boston, gdf_san_francisco]:
+    gdf["image_path"] = [get_image_path(c, b) if isinstance(c, str) else None for c, b in zip(gdf["city"], gdf["building_id"])]
+
+
+gdf_san_francisco.head(5)
+print(gdf_san_francisco.index)
+```
+
+
+## Get the wheel properties
+Let's get the wheel properties one by one for each city and for the pooled case.
+ 
+```{python}
+#Necessary paths
+PATH_CTP_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"
+ctp_model_pooled = joblib.load(PATH_CTP_POOLED)
+PATH_CTP_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_monterrey.pkl"
+ctp_model_monterrey = joblib.load(PATH_CTP_MONTERREY)  
+PATH_CTP_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_boston.pkl"
+ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
+PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
+ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
+
+PATH_SINGLE_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_pooled_3_cities.pkl"
+single_model_pooled = joblib.load(PATH_SINGLE_POOLED)
+PATH_SINGLE_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_monterrey.pkl"
+single_model_monterrey = joblib.load(PATH_SINGLE_MONTERREY)
+PATH_SINGLE_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_boston.pkl"
+single_model_boston = joblib.load(PATH_SINGLE_BOSTON)
+PATH_SINGLE_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_sanfrancisco.pkl"
+single_model_san_francisco = joblib.load(PATH_SINGLE_SF)
+
+def compute_rmse(predicted, ground_truths):
+    sum_square_differences = 0
+    n = len(predicted)
+    for i in range(0,n):
+        sum_square_differences += (predicted[i] - ground_truths[i])**2
+    
+    sum_square_differences = sum_square_differences/n
+    return np.sqrt(sum_square_differences)
+
+def get_rmse_for_gdf(gdf, ground_truths, model_ctp, model_single):
+    rows = [i for i in gdf.index if i in index_to_features]
+    features = np.array([index_to_features[i] for i in rows])
+
+    predictions_ctp = list(model_ctp.predict(features))
+    predictions_single = list(model_single.predict(features))
+
+    rmse_single = compute_rmse(predictions_single, ground_truths)
+    rmse_ctp = compute_rmse(predictions_ctp, ground_truths)
+
+    gain = 100*(rmse_single - rmse_ctp)/rmse_single
+
+    return gain
+
+def filter_gdf_per_property_and_value(
+    gdf,
+    column, 
+    value
+):
+    return gdf[gdf[column] == value]
+
+#We will separate different GDFs per cluster
+cluster_gdfs = {}
+wheel_elements = {}
+cluster_centroids = {}
+
+POOLED_KEY = "Pooled"
+MONTERREY_KEY = "Monterrey"
+SF_KEY = "San Francisco"
+BOSTON_KEY = "Boston"
+
+for key in [POOLED_KEY, MONTERREY_KEY, BOSTON_KEY, SF_KEY]:
+    cluster_gdfs[key] = {}
+    wheel_elements[key] = {}
+    cluster_centroids[key] = {}
+
+N_CLUSTERS_POOLED = len(np.unique(gdf_all["cluster"].dropna()))
+
+#Pooled gdfs per cluster
+for i in range(0,N_CLUSTERS_POOLED):
+    cluster_gdfs[POOLED_KEY][i] = gdf_all[gdf_all["cluster"] == i]
+    wheel_elements[POOLED_KEY][i] = []
+    cluster_centroids[POOLED_KEY][i] = ctp_model_pooled.cluster_centers_[i]
+
+#Do the same for the per-city cases
+N_CLUSTERS_MONTERREY = len(np.unique(gdf_monterrey["cluster"].dropna()))
+#Monterrey gdfs per cluster
+for i in range(0,N_CLUSTERS_MONTERREY):
+    cluster_gdfs[MONTERREY_KEY][i] = gdf_monterrey[gdf_monterrey["cluster"] == i]
+    wheel_elements[MONTERREY_KEY][i] = []
+    cluster_centroids[MONTERREY_KEY][i] = ctp_model_monterrey.cluster_centers_[i]
+
+
+N_CLUSTERS_BOSTON = len(np.unique(gdf_boston["cluster"].dropna()))
+#Boston gdfs per cluster
+for i in range(0,N_CLUSTERS_BOSTON):
+    cluster_gdfs[BOSTON_KEY][i] = gdf_boston[gdf_boston["cluster"] == i]
+    wheel_elements[BOSTON_KEY][i] = []
+    cluster_centroids[BOSTON_KEY][i] = ctp_model_boston.cluster_centers_[i]
+
+N_CLUSTERS_SF = len(np.unique(gdf_san_francisco["cluster"].dropna()))
+#San Francisco gdfs per cluster
+for i in range(0,N_CLUSTERS_SF):
+    cluster_gdfs[SF_KEY][i] = gdf_san_francisco[gdf_san_francisco["cluster"] == i]
+    wheel_elements[SF_KEY][i] = []
+    cluster_centroids[SF_KEY][i] = ctp_model_san_francisco.cluster_centers_[i]
+```
+### RMSE gains
+
+```{python}
+RMSE_PROPERTY_NAME = "RMSE Gain"
+
+def save_rmse_wheel_elements(
+    key, 
+    number_of_clusters,
+    cpt_model,
+    single_model,
+):
+    for i in range(0,number_of_clusters):
+        gdf = cluster_gdfs[key][i]
+        gdf = gdf[gdf["data_type"] == "validation"]
+        rmse_value = get_rmse_for_gdf(gdf, list(gdf["real_height"]), cpt_model, single_model)
+        wheel_element = WheelElement(
+            data = rmse_value,
+            group_name = f"Cluster {i+1}",
+            feature_name = RMSE_PROPERTY_NAME
+        )
+        wheel_elements[key][i].append(
+            wheel_element
+        )
+
+
+
+#Pooled model gains
+save_rmse_wheel_elements(POOLED_KEY, N_CLUSTERS_POOLED, ctp_model_pooled, single_model_pooled)
+#Monterrey model gains
+save_rmse_wheel_elements(MONTERREY_KEY, N_CLUSTERS_MONTERREY, ctp_model_monterrey, single_model_monterrey)
+#Boston model gains
+save_rmse_wheel_elements(BOSTON_KEY, N_CLUSTERS_BOSTON, ctp_model_boston, single_model_boston)
+#San Francisco model gains
+save_rmse_wheel_elements(SF_KEY, N_CLUSTERS_SF, ctp_model_san_francisco, single_model_san_francisco)
+
+```
+
+### Building heights
+```{python}
+BUILDING_HEIGHT_PROPERTY = "Building height"
+
+def save_building_height_wheel_elements(
+    key, 
+    number_of_clusters,
+    cpt_model,
+    single_model,
+):
+    for i in range(0,number_of_clusters):
+        gdf = cluster_gdfs[key][i]
+        height_value = np.nanmean(gdf["real_height"])
+        wheel_element = WheelElement(
+            data = height_value,
+            group_name = f"Cluster {i+1}",
+            feature_name = BUILDING_HEIGHT_PROPERTY
+        )
+        wheel_elements[key][i].append(
+            wheel_element
+        )
+
+#Pooled building heights
+save_building_height_wheel_elements(POOLED_KEY, N_CLUSTERS_POOLED, ctp_model_pooled, single_model_pooled)
+#Monterrey building heights
+save_building_height_wheel_elements(MONTERREY_KEY, N_CLUSTERS_MONTERREY, ctp_model_monterrey, single_model_monterrey)
+#Boston building heights
+save_building_height_wheel_elements(BOSTON_KEY, N_CLUSTERS_BOSTON, ctp_model_boston, single_model_boston)
+#San Francisco building heights
+save_building_height_wheel_elements(SF_KEY, N_CLUSTERS_SF, ctp_model_san_francisco, single_model_san_francisco)
+```
+### Majority City
+Calculate the city that contributes the highest share of buildings for each cluster and the percentage it contributes.
+
+```{python}
+
+def compute_majority_city_and_percentage(cities_list):
+    unique_categories = list(np.unique(cities_list))
+    n_unique_categories = len(unique_categories)
+    counts = np.zeros(n_unique_categories)
+    #Iterate over the categories
+    for i in range(len(cities_list)):
+        city = cities_list[i]
+        index = unique_categories.index(city)
+        counts[index] += 1
+    
+    counts = np.array(counts)
+    shares = (counts/len(cities_list))*100
+    index_max = np.argmax(shares)
+    majority_city = unique_categories[index_max]
+    majority_city_share = shares[index_max]
+
+    return majority_city, majority_city_share
+
+
+def save_majority_city_wheel_elements(
+    key,
+    number_of_clusters,
+    cpt_model,
+    single_model
+):
+    for i in range(0,number_of_clusters):
+        gdf = cluster_gdfs[key][i]
+        cities = list(gdf["city"])
+        majority_city, majority_city_share = compute_majority_city_and_percentage(
+            cities
+        )
+
+        label = f"{majority_city} ({majority_city_share:.1f} %)"
+        wheel_element = WheelElement(
+            label,
+            group_name = f"Cluster {i+1}",
+            feature_name = "City"
+        )
+        wheel_elements[key][i].append(wheel_element)
+
+#Pooled majority city
+save_majority_city_wheel_elements(POOLED_KEY, N_CLUSTERS_POOLED, ctp_model_pooled, single_model_pooled)
+#Monterrey majority city
+save_majority_city_wheel_elements(MONTERREY_KEY, N_CLUSTERS_MONTERREY, ctp_model_monterrey, single_model_monterrey)
+#Boston majority city
+save_majority_city_wheel_elements(BOSTON_KEY, N_CLUSTERS_BOSTON, ctp_model_boston, single_model_boston)
+#San Francisco majority city
+save_majority_city_wheel_elements(SF_KEY, N_CLUSTERS_SF, ctp_model_san_francisco, single_model_san_francisco)
+```
+### Majority material
+Calculate the material that dominates the facade of most buildings in each cluster and the percentage of buildings it dominates.
+
+```{python}
+#The materials the models use.
+VALID_MATERIALS = ["concrete", "metal", "glass", "plastic", "asphalt", "brick", "human_body", "wood", "plaster", "leaf"]
+MATERIAL_NAMES = {"human_body": "person", "leaf": "vegetation"}
+
+def save_majority_material_wheel_elements(
+    key,
+    number_of_clusters
+):
+    material_columns = [f"material_pct_{m}" for m in VALID_MATERIALS]
+    for i in range(0,number_of_clusters):
+        gdf = cluster_gdfs[key][i]
+        #Dominant material of each building that has material values.
+        material_values = gdf[material_columns].astype(float).dropna(how = "all").to_numpy()
+        dominant_materials = [VALID_MATERIALS[j] for j in np.nanargmax(material_values, axis = 1)]
+        majority_material, majority_material_share = compute_majority_city_and_percentage(
+            dominant_materials
+        )
+
+        label = f"{MATERIAL_NAMES.get(majority_material, majority_material)} ({majority_material_share:.1f} %)"
+        wheel_element = WheelElement(
+            label,
+            group_name = f"Cluster {i+1}",
+            feature_name = "Material"
+        )
+        wheel_elements[key][i].append(wheel_element)
+
+#Pooled majority material
+save_majority_material_wheel_elements(POOLED_KEY, N_CLUSTERS_POOLED)
+#Monterrey majority material
+save_majority_material_wheel_elements(MONTERREY_KEY, N_CLUSTERS_MONTERREY)
+#Boston majority material
+save_majority_material_wheel_elements(BOSTON_KEY, N_CLUSTERS_BOSTON)
+#San Francisco majority material
+save_majority_material_wheel_elements(SF_KEY, N_CLUSTERS_SF)
+```
+
+### Representative footprint and SVI
+Get a representative footprint and SVI for each of the clusters.
+
+```{python}
+
+
+
+def get_distance_to_cluster(vector, cluster_centroid):
+    n_features = len(vector)
+    dst = 0
+    for i in range(0,n_features):
+        dst += (vector[i] - cluster_centroid[i])**2
+    
+    dst = np.sqrt(dst)
+    return dst
+
+
+indexes_array = {}
+indexes_array[POOLED_KEY] = [0, 0, 0, 0, 0, 0]
+indexes_array[MONTERREY_KEY] = [1, 0, 0]
+indexes_array[BOSTON_KEY] = [0, 0, 0]
+indexes_array[SF_KEY] = [0, 0, 0]
+
+
+
+def get_building_image_and_footprint(
+    key,
+    cluster_index
+):
+    gdf = cluster_gdfs[key][cluster_index]
+    geometries = list(gdf["geometry"])
+    image_paths = list(gdf["image_path"])
+    feature_vectors = [index_to_features[j][:-1] for j in gdf.index]
+    cluster_centroid = cluster_centroids[key][cluster_index]
+
+    index_k_nearest_neighbor = indexes_array[key][cluster_index]
+    distances_from_centroid = [get_distance_to_cluster(x, cluster_centroid) for x in feature_vectors]
+
+    k_th_index = np.argsort(distances_from_centroid)[index_k_nearest_neighbor]
+
+    footprint = geometries[k_th_index]
+    image = np.array(Image.open(image_paths[k_th_index]))
+
+    return footprint, image
+
+FOOTPRINT_KEY = "Footprint"
+IMAGE_KEY = "Image"
+
+def save_footprint_image_elements(
+    key,
+    number_of_clusters
+):
+    for i in range(0,number_of_clusters):
+        footprint, image = get_building_image_and_footprint(key, i)
+
+        wheel_element_footprint = WheelElement(
+            footprint, 
+            group_name = f"Cluster {i+1}",
+            feature_name = FOOTPRINT_KEY
+        )
+
+        wheel_element_image = WheelElement(
+            image,
+            group_name = f"Cluster {i+1}",
+            feature_name = IMAGE_KEY
+        )
+
+        wheel_elements[key][i].append(wheel_element_footprint)
+        wheel_elements[key][i].append(wheel_element_image)
+
+#Pooled footprints and images
+save_footprint_image_elements(POOLED_KEY, N_CLUSTERS_POOLED)
+#Monterrey footprints and images
+save_footprint_image_elements(MONTERREY_KEY, N_CLUSTERS_MONTERREY)
+#Boston footprints and images
+save_footprint_image_elements(BOSTON_KEY, N_CLUSTERS_BOSTON)
+#San Francisco footprints and images
+save_footprint_image_elements(SF_KEY, N_CLUSTERS_SF)
+
+```
+
+
+### Wheel Diagram for the Pooled case
+
+Let's draw the wheel diagram for the pooled case, which combines all data from Monterrey, Boston, and San Francisco.
+
+```{python}
+all_elements = []
+
+def combine_cluster_elements(elements, cluster_elements,key,n_clusters):
+    for i in range(0,n_clusters):
+        all_elements.extend(cluster_elements[key][i])
+
+combine_cluster_elements(all_elements, wheel_elements, POOLED_KEY, N_CLUSTERS_POOLED)
+
+visualization = WheelVisualization(
+    all_elements,
+    radius_size = 40,
+    image_scale = 0.5,
+    image_outer_boost = 1.2,
+    reduction_factor = 0.7
+    )
+
+visualization.draw_wheel(
+    cmap = cmc.batlow, 
+    radial_alpha = 0.1, 
+    circle_linewidth = 0.7,
+    figure_height=12, 
+    figure_width=12, 
+    save_path = "/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/wheel_pooled_3_cities.png", group_label_boost=1.7, 
+    wedge_gamma = 0.6,
+    n_ticks = 5)
+```
+
+
+### Wheel Diagram for the Monterrey case
+```{python}
+all_elements = []
+combine_cluster_elements(
+    all_elements,
+    wheel_elements,
+    MONTERREY_KEY,
+    N_CLUSTERS_MONTERREY
+)
+
+visualization = WheelVisualization(
+    all_elements,
+    radius_size = 40,
+    image_scale = 0.5,
+    image_outer_boost = 1.2,
+    reduction_factor = 0.7
+    )
+
+visualization.draw_wheel(
+    cmap = cmc.batlow, 
+    radial_alpha = 0.1, 
+    circle_linewidth = 0.7,
+    figure_height=12, 
+    figure_width=12, 
+    save_path = "/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/wheel_monterrey.png", group_label_boost=1.7, 
+    wedge_gamma = 0.6,
+    n_ticks = 5)
+```
+
+### Wheel diagram for the Boston case
+```{python}
+all_elements = []
+combine_cluster_elements(
+    all_elements,
+    wheel_elements,
+    BOSTON_KEY,
+    N_CLUSTERS_BOSTON
+)
+
+visualization = WheelVisualization(
+    all_elements,
+    radius_size = 40,
+    image_scale = 0.5,
+    image_outer_boost = 1.2,
+    reduction_factor = 0.7
+    )
+
+visualization.draw_wheel(
+    cmap = cmc.batlow,
+    radial_alpha = 0.1,
+    circle_linewidth = 0.7,
+    figure_height=12,
+    figure_width=12,
+    save_path = "/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/wheel_boston.png", group_label_boost=1.7,
+    wedge_gamma = 0.6,
+    n_ticks = 5)
+```
+
+### Wheel diagram for the San Francisco case
+```{python}
+all_elements = []
+combine_cluster_elements(
+    all_elements,
+    wheel_elements,
+    SF_KEY,
+    N_CLUSTERS_SF
+)
+
+visualization = WheelVisualization(
+    all_elements,
+    radius_size = 40,
+    image_scale = 0.5,
+    image_outer_boost = 1.2,
+    reduction_factor = 0.7
+    )
+
+visualization.draw_wheel(
+    cmap = cmc.batlow,
+    radial_alpha = 0.1,
+    circle_linewidth = 0.7,
+    figure_height=12,
+    figure_width=12,
+    save_path = "/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/wheel_sanfrancisco.png", group_label_boost=1.7,
+    wedge_gamma = 0.6,
+    n_ticks = 5)
+```
