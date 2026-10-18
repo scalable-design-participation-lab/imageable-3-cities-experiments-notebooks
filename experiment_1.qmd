@@ -224,7 +224,6 @@ with open(f"{DATA_PATH}/data_sanfrancisco.json") as f:
 ```
 
 ### Building the table rows
-Each cell shows the subgroup delta, its stars, and the gain, as in the paper.
 ```{python}
 FEATURES = [
     ("real_height", "Reference height"),
@@ -317,7 +316,6 @@ dataframe_san_francisco
 ```
 
 ### All cities table
-The threshold comes from the validation buildings of the three cities together. Each cell compares the combined footprint model with the combined CTP model, and the stars test whether the CTP model has the lower error.
 ```{python}
 def run_experiment_1_all_cities(
     city_dictionaries,
@@ -327,7 +325,6 @@ def run_experiment_1_all_cities(
     percentile,
     above = True,
 ):
-    #Validation buildings and feature values of each city.
     validation_dictionaries = {}
     city_values = {}
     for city in city_dictionaries:
@@ -338,7 +335,6 @@ def run_experiment_1_all_cities(
             index_of_feature = validation_dictionaries[city][0]["feature_names"].index(feature)
             city_values[city] = [x["features"][index_of_feature] for x in validation_dictionaries[city]]
 
-    #One threshold for the three cities.
     all_values = []
     for city in city_values:
         all_values.extend(city_values[city])

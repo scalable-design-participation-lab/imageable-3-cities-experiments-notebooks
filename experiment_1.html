@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="define-auxiliary-functions" class="level3">
 <h3 class="anchored" data-anchor-id="define-auxiliary-functions">Define auxiliary functions</h3>
-<div id="4de373f5" class="cell" data-execution_count="1">
+<div id="3dc19ad8" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -184,7 +184,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="load-the-models" class="level3">
 <h3 class="anchored" data-anchor-id="load-the-models">Load the models</h3>
-<div id="6b234e26" class="cell" data-execution_count="2">
+<div id="3602add8" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Necessary paths</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>PATH_CTP_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ctp_model_pooled <span class="op">=</span> joblib.load(PATH_CTP_POOLED)</span>
@@ -207,7 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="define-the-experiment-function" class="level3">
 <h3 class="anchored" data-anchor-id="define-the-experiment-function">Define the experiment function</h3>
-<div id="e1e95bbc" class="cell" data-execution_count="3">
+<div id="b87600f0" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This experiment applies the experiment to get one of the rows.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_1(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    dictionaries,</span>
@@ -319,7 +319,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="open-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="open-the-data">Open the data</h3>
-<div id="336ce1d9" class="cell" data-execution_count="4">
+<div id="24b9355d" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DATA_PATH <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_PATH<span class="sc">}</span><span class="ss">/data_monterrey.json"</span>) <span class="im">as</span> f:</span>
@@ -334,8 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="building-the-table-rows" class="level3">
 <h3 class="anchored" data-anchor-id="building-the-table-rows">Building the table rows</h3>
-<p>Each cell shows the subgroup delta, its stars, and the gain, as in the paper.</p>
-<div id="0569d36f" class="cell" data-execution_count="5">
+<div id="5d8749d4" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"real_height"</span>, <span class="st">"Reference height"</span>),</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"building_height"</span>, <span class="st">"Street-view height"</span>),</span>
@@ -401,7 +400,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="monterrey-table" class="level3">
 <h3 class="anchored" data-anchor-id="monterrey-table">Monterrey table</h3>
-<div id="0065f4ba" class="cell" data-execution_count="6">
+<div id="d5bd4d38" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>monterrey_rows <span class="op">=</span> get_city_rows(data_monterrey, ctp_model_monterrey, footprint_model_monterrey)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> monterrey_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
@@ -577,7 +576,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="boston-table" class="level3">
 <h3 class="anchored" data-anchor-id="boston-table">Boston table</h3>
-<div id="95e6054c" class="cell" data-execution_count="7">
+<div id="876238fd" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>boston_rows <span class="op">=</span> get_city_rows(data_boston, ctp_model_boston, footprint_model_boston)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> boston_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
@@ -753,7 +752,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="san-francisco-table" class="level3">
 <h3 class="anchored" data-anchor-id="san-francisco-table">San Francisco table</h3>
-<div id="0a706f6a" class="cell" data-execution_count="8">
+<div id="6a7994be" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>san_francisco_rows <span class="op">=</span> get_city_rows(data_sanfrancisco, ctp_model_san_francisco, footprint_model_san_francisco)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> san_francisco_rows] <span class="cf">for</span> column <span class="kw">in</span> CITY_TABLE_COLUMNS}</span>
@@ -929,8 +928,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="all-cities-table" class="level3">
 <h3 class="anchored" data-anchor-id="all-cities-table">All cities table</h3>
-<p>The threshold comes from the validation buildings of the three cities together. Each cell compares the combined footprint model with the combined CTP model, and the stars test whether the CTP model has the lower error.</p>
-<div id="95c80abc" class="cell" data-execution_count="9">
+<div id="65123352" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_1_all_cities(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    city_dictionaries,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ctp_combined_model,</span>
@@ -939,60 +937,58 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    percentile,</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    above <span class="op">=</span> <span class="va">True</span>,</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Validation buildings and feature values of each city.</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries <span class="op">=</span> {}</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    city_values <span class="op">=</span> {}</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        validation_dictionaries[city] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> city_dictionaries[city] <span class="cf">if</span> x[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"validation"</span>]</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(feature <span class="op">==</span> <span class="st">"real_height"</span>):</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            index_of_feature <span class="op">=</span> validation_dictionaries[city][<span class="dv">0</span>][<span class="st">"feature_names"</span>].index(feature)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"features"</span>][index_of_feature] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">#One threshold for the three cities.</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    all_values <span class="op">=</span> []</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_values:</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        all_values.extend(city_values[city])</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    percentile_threshold <span class="op">=</span> np.percentile(all_values, percentile)</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        all_features <span class="op">=</span> np.array([x[<span class="st">"features"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]])</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        all_real_heights <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        filtered_indices <span class="op">=</span> get_indices_with_threshold(city_values[city], percentile_threshold, upper <span class="op">=</span> above)</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        predictions_ctp <span class="op">=</span> ctp_combined_model.predict(all_features)</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        predictions_footprint <span class="op">=</span> footprint_combined_model.predict(all_features[:, :<span class="dv">13</span>])</span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        delta_all <span class="op">=</span> get_error_differences(predictions_footprint, predictions_ctp, all_real_heights)</span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        delta_subgroup <span class="op">=</span> filter_by_indices(delta_all, filtered_indices)</span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            delta_subgroup</span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        results[city] <span class="op">=</span> format_cell(np.mean(delta_subgroup), np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all), p_value)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries <span class="op">=</span> {}</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    city_values <span class="op">=</span> {}</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        validation_dictionaries[city] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> city_dictionaries[city] <span class="cf">if</span> x[<span class="st">"data_type"</span>] <span class="op">==</span> <span class="st">"validation"</span>]</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(feature <span class="op">==</span> <span class="st">"real_height"</span>):</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            index_of_feature <span class="op">=</span> validation_dictionaries[city][<span class="dv">0</span>][<span class="st">"feature_names"</span>].index(feature)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            city_values[city] <span class="op">=</span> [x[<span class="st">"features"</span>][index_of_feature] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    all_values <span class="op">=</span> []</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_values:</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        all_values.extend(city_values[city])</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    percentile_threshold <span class="op">=</span> np.percentile(all_values, percentile)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_dictionaries:</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        all_features <span class="op">=</span> np.array([x[<span class="st">"features"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]])</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        all_real_heights <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries[city]]</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        filtered_indices <span class="op">=</span> get_indices_with_threshold(city_values[city], percentile_threshold, upper <span class="op">=</span> above)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        predictions_ctp <span class="op">=</span> ctp_combined_model.predict(all_features)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        predictions_footprint <span class="op">=</span> footprint_combined_model.predict(all_features[:, :<span class="dv">13</span>])</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        delta_all <span class="op">=</span> get_error_differences(predictions_footprint, predictions_ctp, all_real_heights)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        delta_subgroup <span class="op">=</span> filter_by_indices(delta_all, filtered_indices)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        statistic, p_value <span class="op">=</span> get_wilcoxon(</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>            delta_subgroup</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        results[city] <span class="op">=</span> format_cell(np.mean(delta_subgroup), np.mean(delta_subgroup) <span class="op">-</span> np.mean(delta_all), p_value)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span>
 <span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>all_cities_rows <span class="op">=</span> []</span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> feature, label <span class="kw">in</span> FEATURES[:<span class="dv">6</span>]:</span>
-<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> above, group <span class="kw">in</span> [(<span class="va">True</span>, <span class="st">"Above"</span>), (<span class="va">False</span>, <span class="st">"Below"</span>)]:</span>
-<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> {<span class="st">"Feature"</span>: label, <span class="st">"Group"</span>: group}</span>
-<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        row.update(run_experiment_1_all_cities(</span>
-<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"Monterrey"</span>: data_monterrey, <span class="st">"Boston"</span>: data_boston, <span class="st">"San Francisco"</span>: data_sanfrancisco},</span>
-<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>            ctp_model_pooled,</span>
-<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>            footprint_model_pooled,</span>
-<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>            feature,</span>
-<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>            <span class="dv">75</span>,</span>
-<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>            above <span class="op">=</span> above</span>
-<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>        ))</span>
-<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        all_cities_rows.append(row)</span>
-<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>ALL_CITIES_TABLE_COLUMNS <span class="op">=</span> [<span class="st">"Feature"</span>, <span class="st">"Group"</span>, <span class="st">"Monterrey"</span>, <span class="st">"Boston"</span>, <span class="st">"San Francisco"</span>]</span>
-<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> all_cities_rows] <span class="cf">for</span> column <span class="kw">in</span> ALL_CITIES_TABLE_COLUMNS}</span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
-<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>all_cities_rows <span class="op">=</span> []</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> feature, label <span class="kw">in</span> FEATURES[:<span class="dv">6</span>]:</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> above, group <span class="kw">in</span> [(<span class="va">True</span>, <span class="st">"Above"</span>), (<span class="va">False</span>, <span class="st">"Below"</span>)]:</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> {<span class="st">"Feature"</span>: label, <span class="st">"Group"</span>: group}</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>        row.update(run_experiment_1_all_cities(</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"Monterrey"</span>: data_monterrey, <span class="st">"Boston"</span>: data_boston, <span class="st">"San Francisco"</span>: data_sanfrancisco},</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>            ctp_model_pooled,</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>            footprint_model_pooled,</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>            feature,</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>            <span class="dv">75</span>,</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>            above <span class="op">=</span> above</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        all_cities_rows.append(row)</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>ALL_CITIES_TABLE_COLUMNS <span class="op">=</span> [<span class="st">"Feature"</span>, <span class="st">"Group"</span>, <span class="st">"Monterrey"</span>, <span class="st">"Boston"</span>, <span class="st">"San Francisco"</span>]</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> all_cities_rows] <span class="cf">for</span> column <span class="kw">in</span> ALL_CITIES_TABLE_COLUMNS}</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>dataframe_all_cities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
