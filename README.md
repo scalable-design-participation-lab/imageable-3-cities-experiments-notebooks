@@ -10,3 +10,4 @@ To view the notebooks click on:
 * [Clustering wheels](https://scalable-design-participation-lab.github.io/imageable-3-cities-experiments-notebooks/clustering_wheels.html)
 * [Model performances](https://scalable-design-participation-lab.github.io/imageable-3-cities-experiments-notebooks/performance_models.html)
 * [Framework experiment 1](https://scalable-design-participation-lab.github.io/imageable-3-cities-experiments-notebooks/experiment_1.html)
+* [Framework experiment 2](https://scalable-design-participation-lab.github.io/imageable-3-cities-experiments-notebooks/experiment_2.html)

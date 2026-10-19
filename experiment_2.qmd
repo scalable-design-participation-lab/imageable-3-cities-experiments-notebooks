@@ -1,0 +1,159 @@
+---
+title: Experiment 2
+author: Uriel Legaria
+jupyter: imageable
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+### Define auxiliary functions
+```{python}
+import json
+import numpy as np
+import pandas as pd
+import joblib
+
+def filter_dictionary_list(list, property_name, value):
+    return [x for x in list if x[property_name] == value]
+
+def compute_mse(ground_truths, predicted_values):
+
+    mse = 0
+    n_data = len(ground_truths)
+    for i in range(n_data):
+        y_truth = ground_truths[i]
+        y_predicted = predicted_values[i]
+        mse += ((y_truth - y_predicted)**2)/n_data
+
+    return mse
+
+def compute_rmse(ground_truths, predicted_values):
+    mse = compute_mse(ground_truths, predicted_values)
+
+    return np.sqrt(mse)
+```
+
+### Load the models
+```{python}
+#Necessary paths
+PATH_CTP_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"
+ctp_model_pooled = joblib.load(PATH_CTP_POOLED)
+PATH_CTP_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_monterrey.pkl"
+ctp_model_monterrey = joblib.load(PATH_CTP_MONTERREY)
+PATH_CTP_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_boston.pkl"
+ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
+PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
+ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
+
+PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
+footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
+PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
+footprint_model_monterrey = joblib.load(PATH_FOOTPRINT_MONTERREY)
+PATH_FOOTPRINT_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"
+footprint_model_boston = joblib.load(PATH_FOOTPRINT_BOSTON)
+PATH_FOOTPRINT_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"
+footprint_model_san_francisco = joblib.load(PATH_FOOTPRINT_SF)
+```
+
+### Open the data
+```{python}
+DATA_PATH = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"
+
+with open(f"{DATA_PATH}/data_monterrey.json") as f:
+    data_monterrey = json.load(f)
+
+with open(f"{DATA_PATH}/data_boston.json") as f:
+    data_boston = json.load(f)
+
+with open(f"{DATA_PATH}/data_sanfrancisco.json") as f:
+    data_sanfrancisco = json.load(f)
+
+with open(f"{DATA_PATH}/data_pooled_3_cities.json") as f:
+    data_pooled = json.load(f)
+```
+
+### Define the experiment function
+```{python}
+def run_experiment_2(
+    city,
+    cluster,
+    validation_dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    footprint_city_model,
+    footprint_combined_model,
+):
+    results = {}
+
+    all_features = np.array([x["features"] for x in validation_dictionaries])
+    all_heights = [x["real_height"] for x in validation_dictionaries]
+
+    predictions_ctp_city_model = ctp_city_model.predict(all_features)
+    predictions_ctp_combined_model = ctp_combined_model.predict(all_features)
+
+    #The footprint models only use the 13 footprint features, which come first.
+    predictions_footprint_city_model = footprint_city_model.predict(all_features[:, :13])
+    predictions_footprint_combined_model = footprint_combined_model.predict(all_features[:, :13])
+
+    rmse_ctp_city = compute_rmse(all_heights, predictions_ctp_city_model)
+    rmse_ctp_combined = compute_rmse(all_heights, predictions_ctp_combined_model)
+    rmse_footprint_city = compute_rmse(all_heights, predictions_footprint_city_model)
+    rmse_footprint_combined = compute_rmse(all_heights, predictions_footprint_combined_model)
+
+    results["N"] = len(validation_dictionaries)
+    results["Cluster"] = cluster
+    results["City"] = city
+    results["C_city - C_comb"] = rmse_ctp_city - rmse_ctp_combined
+    results["F_city - F_comb"] = rmse_footprint_city - rmse_footprint_combined
+    results["F_city - C_city"] = rmse_footprint_city - rmse_ctp_city
+    results["F_comb - C_comb"] = rmse_footprint_combined - rmse_ctp_combined
+
+    return results
+```
+
+### Getting all rows
+```{python}
+validation_pooled = filter_dictionary_list(data_pooled, "data_type", "validation")
+N_CLUSTERS = len(np.unique([x["cluster"] for x in validation_pooled]))
+
+city_models = {
+    "Monterrey": (ctp_model_monterrey, footprint_model_monterrey),
+    "Boston": (ctp_model_boston, footprint_model_boston),
+    "San Francisco": (ctp_model_san_francisco, footprint_model_san_francisco)
+}
+
+all_rows = []
+for cluster in range(0, N_CLUSTERS):
+    for city in city_models:
+        validation_dictionaries = filter_dictionary_list(validation_pooled, "cluster", cluster)
+        validation_dictionaries = filter_dictionary_list(validation_dictionaries, "city", city)
+        ctp_city_model, footprint_city_model = city_models[city]
+
+        results = run_experiment_2(
+            city,
+            cluster + 1,
+            validation_dictionaries,
+            ctp_city_model,
+            ctp_model_pooled,
+            footprint_city_model,
+            footprint_model_pooled
+        )
+        all_rows.append(results)
+
+TABLE_COLUMNS = [
+    "N",
+    "Cluster",
+    "City",
+    "C_city - C_comb",
+    "F_city - F_comb",
+    "F_city - C_city",
+    "F_comb - C_comb"
+]
+
+dataframe_dictionary = {column: [x[column] for x in all_rows] for column in TABLE_COLUMNS}
+dataframe = pd.DataFrame(data = dataframe_dictionary).round(2)
+dataframe
+```
+
