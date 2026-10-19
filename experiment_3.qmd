@@ -1,0 +1,363 @@
+---
+title: Experiment 3
+author: Uriel Legaria
+jupyter: imageable
+format: html
+execute:
+  warning: false
+  message: false
+---
+
+### Define auxiliary functions
+```{python}
+import json
+import numpy as np
+import pandas as pd
+import joblib
+import matplotlib.pyplot as plt
+from imageable.visualization.data_visualization import plot_grouped_distribution_bars
+
+def filter_dictionary_list(list, property_name, value):
+    return [x for x in list if x[property_name] == value]
+
+def compute_mse(ground_truths, predicted_values):
+
+    mse = 0
+    n_data = len(ground_truths)
+    for i in range(n_data):
+        y_truth = ground_truths[i]
+        y_predicted = predicted_values[i]
+        mse += ((y_truth - y_predicted)**2)/n_data
+
+    return mse
+
+def compute_rmse(ground_truths, predicted_values):
+    mse = compute_mse(ground_truths, predicted_values)
+
+    return np.sqrt(mse)
+
+
+def filter_by_indices(values, indices):
+    """
+    Return only the values at locations indicated in indices.
+    """
+
+    new_values = []
+    for i in range(0,len(values)):
+        if (i in indices):
+            new_values.append(values[i])
+
+    return new_values
+
+
+def binarize_values(
+        original_values,
+        percentile = 75
+    ):
+    high_value_percentile = np.percentile(original_values, percentile)
+    low_mid_values = []
+    high_values = []
+    low_mid_indices = []
+    high_indices = []
+    for i in range(0,len(original_values)):
+        value = original_values[i]
+        if(value > high_value_percentile):
+            high_values.append(value)
+            high_indices.append(i)
+        else:
+            low_mid_values.append(value)
+            low_mid_indices.append(i)
+
+    return low_mid_values, high_values, low_mid_indices, high_indices
+```
+
+### Load the models
+```{python}
+#Necessary paths
+PATH_CTP_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"
+ctp_model_pooled = joblib.load(PATH_CTP_POOLED)
+PATH_CTP_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_monterrey.pkl"
+ctp_model_monterrey = joblib.load(PATH_CTP_MONTERREY)
+PATH_CTP_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_boston.pkl"
+ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
+PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
+ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
+
+PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
+footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
+PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
+footprint_model_monterrey = joblib.load(PATH_FOOTPRINT_MONTERREY)
+PATH_FOOTPRINT_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"
+footprint_model_boston = joblib.load(PATH_FOOTPRINT_BOSTON)
+PATH_FOOTPRINT_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"
+footprint_model_san_francisco = joblib.load(PATH_FOOTPRINT_SF)
+```
+
+### Open the data
+```{python}
+DATA_PATH = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"
+
+with open(f"{DATA_PATH}/data_monterrey.json") as f:
+    data_monterrey = json.load(f)
+
+with open(f"{DATA_PATH}/data_boston.json") as f:
+    data_boston = json.load(f)
+
+with open(f"{DATA_PATH}/data_sanfrancisco.json") as f:
+    data_sanfrancisco = json.load(f)
+
+with open(f"{DATA_PATH}/data_pooled_3_cities.json") as f:
+    data_pooled = json.load(f)
+
+DESCRIPTORS_PATH = "/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/experiments"
+
+with open(f"{DESCRIPTORS_PATH}/monterrey/results/preparation_experiment_3.json") as f:
+    descriptors_monterrey = json.load(f)
+
+with open(f"{DESCRIPTORS_PATH}/boston/results/preparation_experiment_3.json") as f:
+    descriptors_boston = json.load(f)
+
+with open(f"{DESCRIPTORS_PATH}/sanfrancisco/results/preparation_experiment_3.json") as f:
+    descriptors_sanfrancisco = json.load(f)
+
+with open(f"{DESCRIPTORS_PATH}/pooled/results/preparation_experiment_3.json") as f:
+    descriptors_pooled = json.load(f)
+```
+
+### Define the experiment function
+```{python}
+def run_experiment_3(
+    city,
+    condition,
+    validation_dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    footprint_city_model,
+    footprint_combined_model,
+):
+    results = {}
+
+    all_features = np.array([x["features"] for x in validation_dictionaries])
+    all_heights = [x["real_height"] for x in validation_dictionaries]
+
+    predictions_ctp_city_model = ctp_city_model.predict(all_features)
+    predictions_ctp_combined_model = ctp_combined_model.predict(all_features)
+
+    #The footprint models only use the 13 footprint features, which come first.
+    predictions_footprint_city_model = footprint_city_model.predict(all_features[:, :13])
+    predictions_footprint_combined_model = footprint_combined_model.predict(all_features[:, :13])
+
+    rmse_ctp_city = compute_rmse(all_heights, predictions_ctp_city_model)
+    rmse_ctp_combined = compute_rmse(all_heights, predictions_ctp_combined_model)
+    rmse_footprint_city = compute_rmse(all_heights, predictions_footprint_city_model)
+    rmse_footprint_combined = compute_rmse(all_heights, predictions_footprint_combined_model)
+
+    results["N"] = len(validation_dictionaries)
+    results["Condition"] = condition
+    results["City"] = city
+    results["C_city - C_comb"] = rmse_ctp_city - rmse_ctp_combined
+    results["F_city - F_comb"] = rmse_footprint_city - rmse_footprint_combined
+    results["F_city - C_city"] = rmse_footprint_city - rmse_ctp_city
+    results["F_comb - C_comb"] = rmse_footprint_combined - rmse_ctp_combined
+
+    return results
+```
+
+### Define the conditions
+```{python}
+CONDITIONS = [
+    "Failed view refinement",
+    "Few detected lines",
+    "Low line confidence",
+    "Low facade visibility",
+    "Low sky visibility",
+    "Low ground visibility",
+    "Low sharpness",
+    "High image entropy",
+    "High facade vegetation"
+]
+
+def get_condition_dictionaries(validation_dictionaries, descriptors, condition):
+    descriptors_by_index = {x["data_index"]: x for x in descriptors}
+    building_descriptors = [descriptors_by_index[x["index"]] for x in validation_dictionaries]
+
+    if(condition == "Failed view refinement"):
+        indices = [i for i in range(0,len(building_descriptors)) if building_descriptors[i]["refinement_success"] == False]
+        return filter_by_indices(validation_dictionaries, indices)
+
+    if(condition == "Few detected lines"):
+        values = [len(x["lines"]) for x in building_descriptors]
+    elif(condition == "Low line confidence"):
+        values = [np.mean(x["scores"]) for x in building_descriptors]
+    elif(condition == "Low facade visibility"):
+        values = [x["facade_ratio"] for x in building_descriptors]
+    elif(condition == "Low sky visibility"):
+        values = [x["sky_ratio"] for x in building_descriptors]
+    elif(condition == "Low ground visibility"):
+        values = [x["ground_ratio"] for x in building_descriptors]
+    elif(condition == "Low sharpness"):
+        values = [x["sharpness"] for x in building_descriptors]
+    elif(condition == "High image entropy"):
+        values = [x["image_entropy"] for x in building_descriptors]
+    elif(condition == "High facade vegetation"):
+        index_of_feature = validation_dictionaries[0]["feature_names"].index("material_pct_leaf")
+        values = [x["features"][index_of_feature] for x in validation_dictionaries]
+
+    #The high conditions keep the buildings above the 90th percentile, the others the ones at or below the 10th.
+    if(condition.startswith("High")):
+        low_values, high_values, low_indices, high_indices = binarize_values(values, percentile = 90)
+        return filter_by_indices(validation_dictionaries, high_indices)
+
+    low_values, high_values, low_indices, high_indices = binarize_values(values, percentile = 10)
+    return filter_by_indices(validation_dictionaries, low_indices)
+```
+
+### Getting all rows
+```{python}
+city_models = {
+    "Monterrey": (ctp_model_monterrey, footprint_model_monterrey),
+    "Boston": (ctp_model_boston, footprint_model_boston),
+    "San Francisco": (ctp_model_san_francisco, footprint_model_san_francisco)
+}
+
+city_data = {
+    "Monterrey": (data_monterrey, descriptors_monterrey),
+    "Boston": (data_boston, descriptors_boston),
+    "San Francisco": (data_sanfrancisco, descriptors_sanfrancisco)
+}
+
+all_rows = []
+for condition in CONDITIONS:
+    for city in city_models:
+        data, descriptors = city_data[city]
+        validation_dictionaries = filter_dictionary_list(data, "data_type", "validation")
+        condition_dictionaries = get_condition_dictionaries(validation_dictionaries, descriptors, condition)
+        ctp_city_model, footprint_city_model = city_models[city]
+
+        results = run_experiment_3(
+            city,
+            condition,
+            condition_dictionaries,
+            ctp_city_model,
+            ctp_model_pooled,
+            footprint_city_model,
+            footprint_model_pooled
+        )
+        all_rows.append(results)
+
+TABLE_COLUMNS = [
+    "N",
+    "Condition",
+    "City",
+    "C_city - C_comb",
+    "F_city - F_comb",
+    "F_city - C_city",
+    "F_comb - C_comb"
+]
+
+dataframe_dictionary = {column: [x[column] for x in all_rows] for column in TABLE_COLUMNS}
+dataframe = pd.DataFrame(data = dataframe_dictionary).round(2)
+dataframe
+```
+
+### City table
+```{python}
+table_dictionary = {"Condition": CONDITIONS}
+for city in city_models:
+    for column in ["C_city - C_comb", "F_city - F_comb"]:
+        table_dictionary[f"{city} {column}"] = [x[column] for x in all_rows if x["City"] == city]
+
+table = pd.DataFrame(data = table_dictionary).round(2)
+table
+```
+
+### Penalty figure
+```{python}
+def run_experiment_3_all_cities(
+    condition,
+    validation_dictionaries,
+    ctp_combined_model,
+    footprint_combined_model,
+):
+    results = {}
+
+    all_features = np.array([x["features"] for x in validation_dictionaries])
+    all_heights = [x["real_height"] for x in validation_dictionaries]
+
+    predictions_ctp_combined_model = ctp_combined_model.predict(all_features)
+    predictions_footprint_combined_model = footprint_combined_model.predict(all_features[:, :13])
+
+    rmse_ctp_combined = compute_rmse(all_heights, predictions_ctp_combined_model)
+    rmse_footprint_combined = compute_rmse(all_heights, predictions_footprint_combined_model)
+
+    results["N"] = len(validation_dictionaries)
+    results["Condition"] = condition
+    results["F_comb - C_comb"] = rmse_footprint_combined - rmse_ctp_combined
+
+    return results
+
+
+validation_all_cities = filter_dictionary_list(data_pooled, "data_type", "validation")
+
+all_cities_rows = []
+for condition in CONDITIONS:
+    condition_dictionaries = get_condition_dictionaries(validation_all_cities, descriptors_pooled, condition)
+    results = run_experiment_3_all_cities(
+        condition,
+        condition_dictionaries,
+        ctp_model_pooled,
+        footprint_model_pooled
+    )
+    all_cities_rows.append(results)
+
+CONDITION_LABELS = {
+    "Failed view refinement": "Refinement\nfailure",
+    "Few detected lines": "# lines\n≤ P10",
+    "Low line confidence": "Line conf.\n≤ P10",
+    "Low facade visibility": "Bldg. vis.\n≤ P10",
+    "Low sky visibility": "Sky vis.\n≤ P10",
+    "Low ground visibility": "Grnd. vis.\n≤ P10",
+    "Low sharpness": "Sharpness\n≤ P10",
+    "High image entropy": "Entropy\n≥ P90",
+    "High facade vegetation": "Vegetation\n≥ P90"
+}
+
+#The conditions are sorted by the penalty of the combined model.
+penalties_combined = {x["Condition"]: x["F_comb - C_comb"] for x in all_cities_rows}
+conditions = sorted(CONDITIONS, key = lambda condition: penalties_combined[condition])
+
+penalties = {}
+for city in city_models:
+    city_penalties = {x["Condition"]: x["F_city - C_city"] for x in all_rows if x["City"] == city}
+    penalties[f"{city} model"] = [city_penalties[condition] for condition in conditions]
+penalties["Combined model"] = [penalties_combined[condition] for condition in conditions]
+
+plt.rcParams.update({
+    "axes.titlesize":  23,
+    "axes.labelsize":  18,
+    "xtick.labelsize": 14,
+    "ytick.labelsize": 14,
+    "legend.fontsize": 14,
+})
+
+figure, axes = plot_grouped_distribution_bars(
+    groups = [CONDITION_LABELS[condition] for condition in conditions],
+    model_names = list(penalties.keys()),
+    rmse = penalties,
+    show_n = False,
+    figsize = (13,6),
+    value_label_fontsize = 9,
+    title = "Footprint-only penalty by adverse imagery condition and training scope",
+    x_label = "Condition",
+    y_label = "RMSE penalty (m)",
+    savepath = None,
+    show = False,
+    order = "input"
+)
+
+#The same y axis and zero line as the figure in the paper.
+lowest = min(0, min([min(values) for values in penalties.values()]))
+axes.set_ylim(lowest - 0.06, axes.get_ylim()[1])
+axes.axhline(0, color = "#111827", linewidth = 0.8)
+figure.savefig("/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/experiment_3_penalty_by_scope.png", bbox_inches = "tight", pad_inches = 0.03, dpi = 300)
+```
