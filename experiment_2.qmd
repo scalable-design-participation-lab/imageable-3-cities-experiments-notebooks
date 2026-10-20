@@ -47,6 +47,15 @@ ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
 PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
 ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
 
+PATH_SINGLE_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_pooled_3_cities.pkl"
+single_model_pooled = joblib.load(PATH_SINGLE_POOLED)
+PATH_SINGLE_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_monterrey.pkl"
+single_model_monterrey = joblib.load(PATH_SINGLE_MONTERREY)
+PATH_SINGLE_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_boston.pkl"
+single_model_boston = joblib.load(PATH_SINGLE_BOSTON)
+PATH_SINGLE_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_sanfrancisco.pkl"
+single_model_san_francisco = joblib.load(PATH_SINGLE_SF)
+
 PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
 footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
 PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
@@ -155,5 +164,82 @@ TABLE_COLUMNS = [
 dataframe_dictionary = {column: [x[column] for x in all_rows] for column in TABLE_COLUMNS}
 dataframe = pd.DataFrame(data = dataframe_dictionary).round(2)
 dataframe
+```
+
+### Define the single model experiment function
+```{python}
+def run_experiment_2_single_model(
+    city,
+    cluster,
+    validation_dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    single_city_model,
+    single_combined_model,
+):
+    results = {}
+
+    all_features = np.array([x["features"] for x in validation_dictionaries])
+    all_heights = [x["real_height"] for x in validation_dictionaries]
+
+    predictions_ctp_city_model = ctp_city_model.predict(all_features)
+    predictions_ctp_combined_model = ctp_combined_model.predict(all_features)
+
+    predictions_single_city_model = single_city_model.predict(all_features)
+    predictions_single_combined_model = single_combined_model.predict(all_features)
+
+    rmse_ctp_city = compute_rmse(all_heights, predictions_ctp_city_model)
+    rmse_ctp_combined = compute_rmse(all_heights, predictions_ctp_combined_model)
+    rmse_single_city = compute_rmse(all_heights, predictions_single_city_model)
+    rmse_single_combined = compute_rmse(all_heights, predictions_single_combined_model)
+
+    results["N"] = len(validation_dictionaries)
+    results["Cluster"] = cluster
+    results["City"] = city
+    results["S_city - S_comb"] = rmse_single_city - rmse_single_combined
+    results["S_city - C_city"] = rmse_single_city - rmse_ctp_city
+    results["S_comb - C_comb"] = rmse_single_combined - rmse_ctp_combined
+
+    return results
+```
+
+### Getting all single model rows
+```{python}
+city_single_models = {
+    "Monterrey": (ctp_model_monterrey, single_model_monterrey),
+    "Boston": (ctp_model_boston, single_model_boston),
+    "San Francisco": (ctp_model_san_francisco, single_model_san_francisco)
+}
+
+all_single_rows = []
+for cluster in range(0, N_CLUSTERS):
+    for city in city_single_models:
+        validation_dictionaries = filter_dictionary_list(validation_pooled, "cluster", cluster)
+        validation_dictionaries = filter_dictionary_list(validation_dictionaries, "city", city)
+        ctp_city_model, single_city_model = city_single_models[city]
+
+        results = run_experiment_2_single_model(
+            city,
+            cluster + 1,
+            validation_dictionaries,
+            ctp_city_model,
+            ctp_model_pooled,
+            single_city_model,
+            single_model_pooled
+        )
+        all_single_rows.append(results)
+
+SINGLE_TABLE_COLUMNS = [
+    "N",
+    "Cluster",
+    "City",
+    "S_city - S_comb",
+    "S_city - C_city",
+    "S_comb - C_comb"
+]
+
+dataframe_dictionary = {column: [x[column] for x in all_single_rows] for column in SINGLE_TABLE_COLUMNS}
+dataframe_single = pd.DataFrame(data = dataframe_dictionary).round(2)
+dataframe_single
 ```
 
