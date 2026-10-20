@@ -83,6 +83,15 @@ ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
 PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
 ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
 
+PATH_SINGLE_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_pooled_3_cities.pkl"
+single_model_pooled = joblib.load(PATH_SINGLE_POOLED)
+PATH_SINGLE_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_monterrey.pkl"
+single_model_monterrey = joblib.load(PATH_SINGLE_MONTERREY)
+PATH_SINGLE_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_boston.pkl"
+single_model_boston = joblib.load(PATH_SINGLE_BOSTON)
+PATH_SINGLE_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_sanfrancisco.pkl"
+single_model_san_francisco = joblib.load(PATH_SINGLE_SF)
+
 PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
 footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
 PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
@@ -360,4 +369,82 @@ lowest = min(0, min([min(values) for values in penalties.values()]))
 axes.set_ylim(lowest - 0.06, axes.get_ylim()[1])
 axes.axhline(0, color = "#111827", linewidth = 0.8)
 figure.savefig("/Users/legariapena.j/Documents/imageable-2026/imageable/paper-clustering/figures/experiment_3_penalty_by_scope.png", bbox_inches = "tight", pad_inches = 0.03, dpi = 300)
+```
+
+### Define the single model experiment function
+```{python}
+def run_experiment_3_single_model(
+    city,
+    condition,
+    validation_dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    single_city_model,
+    single_combined_model,
+):
+    results = {}
+
+    all_features = np.array([x["features"] for x in validation_dictionaries])
+    all_heights = [x["real_height"] for x in validation_dictionaries]
+
+    predictions_ctp_city_model = ctp_city_model.predict(all_features)
+    predictions_ctp_combined_model = ctp_combined_model.predict(all_features)
+
+    predictions_single_city_model = single_city_model.predict(all_features)
+    predictions_single_combined_model = single_combined_model.predict(all_features)
+
+    rmse_ctp_city = compute_rmse(all_heights, predictions_ctp_city_model)
+    rmse_ctp_combined = compute_rmse(all_heights, predictions_ctp_combined_model)
+    rmse_single_city = compute_rmse(all_heights, predictions_single_city_model)
+    rmse_single_combined = compute_rmse(all_heights, predictions_single_combined_model)
+
+    results["N"] = len(validation_dictionaries)
+    results["Condition"] = condition
+    results["City"] = city
+    results["S_city - S_comb"] = rmse_single_city - rmse_single_combined
+    results["S_city - C_city"] = rmse_single_city - rmse_ctp_city
+    results["S_comb - C_comb"] = rmse_single_combined - rmse_ctp_combined
+
+    return results
+```
+
+### Getting all single model rows
+```{python}
+city_single_models = {
+    "Monterrey": (ctp_model_monterrey, single_model_monterrey),
+    "Boston": (ctp_model_boston, single_model_boston),
+    "San Francisco": (ctp_model_san_francisco, single_model_san_francisco)
+}
+
+all_single_rows = []
+for condition in CONDITIONS:
+    for city in city_single_models:
+        data, descriptors = city_data[city]
+        validation_dictionaries = filter_dictionary_list(data, "data_type", "validation")
+        condition_dictionaries = get_condition_dictionaries(validation_dictionaries, descriptors, condition)
+        ctp_city_model, single_city_model = city_single_models[city]
+
+        results = run_experiment_3_single_model(
+            city,
+            condition,
+            condition_dictionaries,
+            ctp_city_model,
+            ctp_model_pooled,
+            single_city_model,
+            single_model_pooled
+        )
+        all_single_rows.append(results)
+
+SINGLE_TABLE_COLUMNS = [
+    "N",
+    "Condition",
+    "City",
+    "S_city - S_comb",
+    "S_city - C_city",
+    "S_comb - C_comb"
+]
+
+dataframe_dictionary = {column: [x[column] for x in all_single_rows] for column in SINGLE_TABLE_COLUMNS}
+dataframe_single = pd.DataFrame(data = dataframe_dictionary).round(2)
+dataframe_single
 ```

@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="define-auxiliary-functions" class="level3">
 <h3 class="anchored" data-anchor-id="define-auxiliary-functions">Define auxiliary functions</h3>
-<div id="aee7e05a" class="cell" data-execution_count="1">
+<div id="0a6c5811" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -180,7 +180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="load-the-models" class="level3">
 <h3 class="anchored" data-anchor-id="load-the-models">Load the models</h3>
-<div id="be1fccc3" class="cell" data-execution_count="2">
+<div id="84feab62" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Necessary paths</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>PATH_CTP_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_pooled_3_cities.pkl"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ctp_model_pooled <span class="op">=</span> joblib.load(PATH_CTP_POOLED)</span>
@@ -191,19 +191,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>PATH_CTP_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"</span></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ctp_model_san_francisco <span class="op">=</span> joblib.load(PATH_CTP_SF)</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>footprint_model_pooled <span class="op">=</span> joblib.load(PATH_FOOTPRINT_POOLED)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_MONTERREY <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>footprint_model_monterrey <span class="op">=</span> joblib.load(PATH_FOOTPRINT_MONTERREY)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_BOSTON <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>footprint_model_boston <span class="op">=</span> joblib.load(PATH_FOOTPRINT_BOSTON)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>footprint_model_san_francisco <span class="op">=</span> joblib.load(PATH_FOOTPRINT_SF)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>PATH_SINGLE_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_pooled_3_cities.pkl"</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>single_model_pooled <span class="op">=</span> joblib.load(PATH_SINGLE_POOLED)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>PATH_SINGLE_MONTERREY <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_monterrey.pkl"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>single_model_monterrey <span class="op">=</span> joblib.load(PATH_SINGLE_MONTERREY)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>PATH_SINGLE_BOSTON <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_boston.pkl"</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>single_model_boston <span class="op">=</span> joblib.load(PATH_SINGLE_BOSTON)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>PATH_SINGLE_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_sanfrancisco.pkl"</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>single_model_san_francisco <span class="op">=</span> joblib.load(PATH_SINGLE_SF)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_POOLED <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>footprint_model_pooled <span class="op">=</span> joblib.load(PATH_FOOTPRINT_POOLED)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_MONTERREY <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>footprint_model_monterrey <span class="op">=</span> joblib.load(PATH_FOOTPRINT_MONTERREY)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_BOSTON <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_boston.pkl"</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>footprint_model_boston <span class="op">=</span> joblib.load(PATH_FOOTPRINT_BOSTON)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>PATH_FOOTPRINT_SF <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_sanfrancisco.pkl"</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>footprint_model_san_francisco <span class="op">=</span> joblib.load(PATH_FOOTPRINT_SF)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="open-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="open-the-data">Open the data</h3>
-<div id="2180d14f" class="cell" data-execution_count="3">
+<div id="3cce11fc" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>DATA_PATH <span class="op">=</span> <span class="st">"/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_PATH<span class="sc">}</span><span class="ss">/data_monterrey.json"</span>) <span class="im">as</span> f:</span>
@@ -235,7 +244,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="define-the-experiment-function" class="level3">
 <h3 class="anchored" data-anchor-id="define-the-experiment-function">Define the experiment function</h3>
-<div id="84849817" class="cell" data-execution_count="4">
+<div id="f818569c" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_3(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    city,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    condition,</span>
@@ -275,7 +284,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="define-the-conditions" class="level3">
 <h3 class="anchored" data-anchor-id="define-the-conditions">Define the conditions</h3>
-<div id="55f88723" class="cell" data-execution_count="5">
+<div id="38fc012b" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>CONDITIONS <span class="op">=</span> [</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Failed view refinement"</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Few detected lines"</span>,</span>
@@ -325,7 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="getting-all-rows" class="level3">
 <h3 class="anchored" data-anchor-id="getting-all-rows">Getting all rows</h3>
-<div id="927b6e6d" class="cell" data-execution_count="6">
+<div id="cf4d3535" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>city_models <span class="op">=</span> {</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Monterrey"</span>: (ctp_model_monterrey, footprint_model_monterrey),</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Boston"</span>: (ctp_model_boston, footprint_model_boston),</span>
@@ -667,7 +676,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="city-table" class="level3">
 <h3 class="anchored" data-anchor-id="city-table">City table</h3>
-<div id="0aefc05c" class="cell" data-execution_count="7">
+<div id="7a37bed9" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>table_dictionary <span class="op">=</span> {<span class="st">"Condition"</span>: CONDITIONS}</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> city <span class="kw">in</span> city_models:</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> column <span class="kw">in</span> [<span class="st">"C_city - C_comb"</span>, <span class="st">"F_city - F_comb"</span>]:</span>
@@ -792,7 +801,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="penalty-figure" class="level3">
 <h3 class="anchored" data-anchor-id="penalty-figure">Penalty figure</h3>
-<div id="acc37ea5" class="cell" data-execution_count="8">
+<div id="b82d5e8b" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_3_all_cities(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    condition,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries,</span>
@@ -885,6 +894,351 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figure class="figure">
 <p><img src="experiment_3_files/figure-html/cell-9-output-1.png" width="1259" height="587" class="figure-img"></p>
 </figure>
+</div>
+</div>
+</div>
+</section>
+<section id="define-the-single-model-experiment-function" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-single-model-experiment-function">Define the single model experiment function</h3>
+<div id="e69b6663" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_experiment_3_single_model(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    city,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    condition,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    validation_dictionaries,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    ctp_city_model,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ctp_combined_model,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    single_city_model,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    single_combined_model,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> {}</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    all_features <span class="op">=</span> np.array([x[<span class="st">"features"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries])</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    all_heights <span class="op">=</span> [x[<span class="st">"real_height"</span>] <span class="cf">for</span> x <span class="kw">in</span> validation_dictionaries]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_city_model <span class="op">=</span> ctp_city_model.predict(all_features)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    predictions_ctp_combined_model <span class="op">=</span> ctp_combined_model.predict(all_features)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    predictions_single_city_model <span class="op">=</span> single_city_model.predict(all_features)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    predictions_single_combined_model <span class="op">=</span> single_combined_model.predict(all_features)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    rmse_ctp_city <span class="op">=</span> compute_rmse(all_heights, predictions_ctp_city_model)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    rmse_ctp_combined <span class="op">=</span> compute_rmse(all_heights, predictions_ctp_combined_model)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    rmse_single_city <span class="op">=</span> compute_rmse(all_heights, predictions_single_city_model)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    rmse_single_combined <span class="op">=</span> compute_rmse(all_heights, predictions_single_combined_model)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"N"</span>] <span class="op">=</span> <span class="bu">len</span>(validation_dictionaries)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"Condition"</span>] <span class="op">=</span> condition</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"City"</span>] <span class="op">=</span> city</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"S_city - S_comb"</span>] <span class="op">=</span> rmse_single_city <span class="op">-</span> rmse_single_combined</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"S_city - C_city"</span>] <span class="op">=</span> rmse_single_city <span class="op">-</span> rmse_ctp_city</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    results[<span class="st">"S_comb - C_comb"</span>] <span class="op">=</span> rmse_single_combined <span class="op">-</span> rmse_ctp_combined</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="getting-all-single-model-rows" class="level3">
+<h3 class="anchored" data-anchor-id="getting-all-single-model-rows">Getting all single model rows</h3>
+<div id="5502ab4b" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>city_single_models <span class="op">=</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Monterrey"</span>: (ctp_model_monterrey, single_model_monterrey),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Boston"</span>: (ctp_model_boston, single_model_boston),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"San Francisco"</span>: (ctp_model_san_francisco, single_model_san_francisco)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>all_single_rows <span class="op">=</span> []</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> condition <span class="kw">in</span> CONDITIONS:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> city <span class="kw">in</span> city_single_models:</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        data, descriptors <span class="op">=</span> city_data[city]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        validation_dictionaries <span class="op">=</span> filter_dictionary_list(data, <span class="st">"data_type"</span>, <span class="st">"validation"</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        condition_dictionaries <span class="op">=</span> get_condition_dictionaries(validation_dictionaries, descriptors, condition)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        ctp_city_model, single_city_model <span class="op">=</span> city_single_models[city]</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> run_experiment_3_single_model(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            city,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            condition,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            condition_dictionaries,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            ctp_city_model,</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>            ctp_model_pooled,</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>            single_city_model,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            single_model_pooled</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        all_single_rows.append(results)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>SINGLE_TABLE_COLUMNS <span class="op">=</span> [</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"N"</span>,</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Condition"</span>,</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"City"</span>,</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S_city - S_comb"</span>,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S_city - C_city"</span>,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S_comb - C_comb"</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>dataframe_dictionary <span class="op">=</span> {column: [x[column] <span class="cf">for</span> x <span class="kw">in</span> all_single_rows] <span class="cf">for</span> column <span class="kw">in</span> SINGLE_TABLE_COLUMNS}</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>dataframe_single <span class="op">=</span> pd.DataFrame(data <span class="op">=</span> dataframe_dictionary).<span class="bu">round</span>(<span class="dv">2</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>dataframe_single</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">N</th>
+<th data-quarto-table-cell-role="th">Condition</th>
+<th data-quarto-table-cell-role="th">City</th>
+<th data-quarto-table-cell-role="th">S_city - S_comb</th>
+<th data-quarto-table-cell-role="th">S_city - C_city</th>
+<th data-quarto-table-cell-role="th">S_comb - C_comb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>609</td>
+<td>Failed view refinement</td>
+<td>Monterrey</td>
+<td>-0.79</td>
+<td>0.12</td>
+<td>0.58</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>737</td>
+<td>Failed view refinement</td>
+<td>Boston</td>
+<td>-0.10</td>
+<td>0.17</td>
+<td>0.09</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>700</td>
+<td>Failed view refinement</td>
+<td>San Francisco</td>
+<td>0.04</td>
+<td>0.04</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>217</td>
+<td>Few detected lines</td>
+<td>Monterrey</td>
+<td>-0.17</td>
+<td>0.02</td>
+<td>0.01</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>199</td>
+<td>Few detected lines</td>
+<td>Boston</td>
+<td>-0.12</td>
+<td>0.17</td>
+<td>0.14</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">5</th>
+<td>201</td>
+<td>Few detected lines</td>
+<td>San Francisco</td>
+<td>-0.25</td>
+<td>0.03</td>
+<td>-0.06</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">6</th>
+<td>217</td>
+<td>Low line confidence</td>
+<td>Monterrey</td>
+<td>0.00</td>
+<td>0.01</td>
+<td>-0.09</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">7</th>
+<td>199</td>
+<td>Low line confidence</td>
+<td>Boston</td>
+<td>-0.12</td>
+<td>-0.02</td>
+<td>-0.11</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">8</th>
+<td>199</td>
+<td>Low line confidence</td>
+<td>San Francisco</td>
+<td>-0.35</td>
+<td>-0.03</td>
+<td>0.09</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">9</th>
+<td>217</td>
+<td>Low facade visibility</td>
+<td>Monterrey</td>
+<td>-0.15</td>
+<td>0.15</td>
+<td>-0.02</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">10</th>
+<td>199</td>
+<td>Low facade visibility</td>
+<td>Boston</td>
+<td>-0.31</td>
+<td>-0.01</td>
+<td>0.04</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">11</th>
+<td>199</td>
+<td>Low facade visibility</td>
+<td>San Francisco</td>
+<td>-0.26</td>
+<td>-0.05</td>
+<td>-0.07</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">12</th>
+<td>1008</td>
+<td>Low sky visibility</td>
+<td>Monterrey</td>
+<td>-0.55</td>
+<td>0.06</td>
+<td>0.44</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">13</th>
+<td>764</td>
+<td>Low sky visibility</td>
+<td>Boston</td>
+<td>-0.01</td>
+<td>0.17</td>
+<td>0.08</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">14</th>
+<td>843</td>
+<td>Low sky visibility</td>
+<td>San Francisco</td>
+<td>0.07</td>
+<td>0.06</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">15</th>
+<td>890</td>
+<td>Low ground visibility</td>
+<td>Monterrey</td>
+<td>-0.66</td>
+<td>0.07</td>
+<td>0.43</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">16</th>
+<td>883</td>
+<td>Low ground visibility</td>
+<td>Boston</td>
+<td>-0.24</td>
+<td>0.06</td>
+<td>0.10</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">17</th>
+<td>1028</td>
+<td>Low ground visibility</td>
+<td>San Francisco</td>
+<td>-0.06</td>
+<td>0.01</td>
+<td>0.05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">18</th>
+<td>217</td>
+<td>Low sharpness</td>
+<td>Monterrey</td>
+<td>0.08</td>
+<td>0.15</td>
+<td>-0.07</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">19</th>
+<td>199</td>
+<td>Low sharpness</td>
+<td>Boston</td>
+<td>-0.63</td>
+<td>-0.03</td>
+<td>0.05</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">20</th>
+<td>199</td>
+<td>Low sharpness</td>
+<td>San Francisco</td>
+<td>0.16</td>
+<td>0.55</td>
+<td>0.02</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">21</th>
+<td>217</td>
+<td>High image entropy</td>
+<td>Monterrey</td>
+<td>-0.12</td>
+<td>0.02</td>
+<td>-0.00</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">22</th>
+<td>199</td>
+<td>High image entropy</td>
+<td>Boston</td>
+<td>-0.14</td>
+<td>0.09</td>
+<td>-0.06</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">23</th>
+<td>199</td>
+<td>High image entropy</td>
+<td>San Francisco</td>
+<td>-0.01</td>
+<td>0.11</td>
+<td>-0.06</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">24</th>
+<td>217</td>
+<td>High facade vegetation</td>
+<td>Monterrey</td>
+<td>-0.17</td>
+<td>0.08</td>
+<td>-0.05</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">25</th>
+<td>199</td>
+<td>High facade vegetation</td>
+<td>Boston</td>
+<td>-0.65</td>
+<td>-0.12</td>
+<td>-0.06</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">26</th>
+<td>199</td>
+<td>High facade vegetation</td>
+<td>San Francisco</td>
+<td>0.05</td>
+<td>0.05</td>
+<td>0.02</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
 </div>
