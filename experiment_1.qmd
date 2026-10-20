@@ -87,6 +87,15 @@ ctp_model_boston = joblib.load(PATH_CTP_BOSTON)
 PATH_CTP_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/cluster_ensemble_model_sanfrancisco.pkl"
 ctp_model_san_francisco = joblib.load(PATH_CTP_SF)
 
+PATH_SINGLE_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_pooled_3_cities.pkl"
+single_model_pooled = joblib.load(PATH_SINGLE_POOLED)
+PATH_SINGLE_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_monterrey.pkl"
+single_model_monterrey = joblib.load(PATH_SINGLE_MONTERREY)
+PATH_SINGLE_BOSTON = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_boston.pkl"
+single_model_boston = joblib.load(PATH_SINGLE_BOSTON)
+PATH_SINGLE_SF = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/single_xgb_model_sanfrancisco.pkl"
+single_model_san_francisco = joblib.load(PATH_SINGLE_SF)
+
 PATH_FOOTPRINT_POOLED = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_pooled_3_cities.pkl"
 footprint_model_pooled = joblib.load(PATH_FOOTPRINT_POOLED)
 PATH_FOOTPRINT_MONTERREY = "/Users/legariapena.j/Documents/imageable-2026/imageable/clustering-paper-notebooks/imageable-3-cities-experiments-notebooks/dummy_data/footprint_xgb_model_monterrey.pkl"
@@ -377,4 +386,152 @@ ALL_CITIES_TABLE_COLUMNS = ["Feature", "Group", "Monterrey", "Boston", "San Fran
 dataframe_dictionary = {column: [x[column] for x in all_cities_rows] for column in ALL_CITIES_TABLE_COLUMNS}
 dataframe_all_cities = pd.DataFrame(data = dataframe_dictionary)
 dataframe_all_cities
+```
+
+### Define the single model experiment function
+```{python}
+#This function gets one of the rows of the single model tables.
+def run_experiment_1_single_model(
+    dictionaries,
+    ctp_city_model,
+    ctp_combined_model,
+    single_city_model,
+    single_combined_model,
+    feature,
+    percentile,
+    above = True,
+):
+
+    results = {}
+    FEATURE_NAMES = dictionaries[0]["feature_names"]
+
+    validation_dictionaries = [x for x in dictionaries if x["data_type"] == "validation"]
+
+    all_features = [x["features"] for x in validation_dictionaries]
+    #The reference height is not one of the features, so it is read from real_height.
+    if(feature == "real_height"):
+        all_values = [x["real_height"] for x in validation_dictionaries]
+    else:
+        index_of_feature = FEATURE_NAMES.index(feature)
+        all_values = [x["features"][index_of_feature] for x in validation_dictionaries]
+    all_real_heights = [x["real_height"] for x in validation_dictionaries]
+
+    percentile_threshold = np.percentile(all_values, percentile)
+
+    filtered_indices = get_indices_with_threshold(
+        all_values,
+        percentile_threshold,
+        upper = above
+    )
+
+    #Filter the features
+    filtered_features = filter_by_indices(
+        all_features,
+        filtered_indices
+    )
+
+    #Filtered ground truths
+    filtered_real_heights = filter_by_indices(
+        all_real_heights,
+        filtered_indices
+    )
+
+    predictions_ctp_city_model = ctp_city_model.predict(np.array(all_features))
+    predictions_ctp_city_model_subgroup = ctp_city_model.predict(np.array(filtered_features))
+
+    predictions_ctp_combined_model = ctp_combined_model.predict(np.array(all_features))
+    predictions_ctp_combined_model_subgroup = ctp_combined_model.predict(np.array(filtered_features))
+
+    predictions_single_city_model = single_city_model.predict(np.array(all_features))
+    predictions_single_city_model_subgroup = single_city_model.predict(np.array(filtered_features))
+
+    predictions_single_combined_model = single_combined_model.predict(np.array(all_features))
+    predictions_single_combined_model_subgroup = single_combined_model.predict(np.array(filtered_features))
+
+    #Single city model against CTP city model.
+    delta_all = get_error_differences(predictions_single_city_model, predictions_ctp_city_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_single_city_model_subgroup, predictions_ctp_city_model_subgroup, filtered_real_heights)
+
+    results["Single_city - CTP_city - delta subgroup"] = np.mean(delta_subgroup)
+    results["Single_city - CTP_city - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    #The test asks whether the single model has the larger error, so it runs on single minus CTP.
+    statistic, p_value = get_wilcoxon(
+        delta_subgroup
+    )
+    results["Single_city - CTP_city - wilcoxon p"] = p_value
+
+    #Single combined model against CTP combined model.
+    delta_all = get_error_differences(predictions_single_combined_model, predictions_ctp_combined_model, all_real_heights)
+    delta_subgroup = get_error_differences(predictions_single_combined_model_subgroup, predictions_ctp_combined_model_subgroup, filtered_real_heights)
+
+    results["Single_comb - CTP_comb - delta subgroup"] = np.mean(delta_subgroup)
+    results["Single_comb - CTP_comb - gain"] = np.mean(delta_subgroup) - np.mean(delta_all)
+    #The test asks whether the single model has the larger error, so it runs on single minus CTP.
+    statistic, p_value = get_wilcoxon(
+        delta_subgroup
+    )
+    results["Single_comb - CTP_comb - wilcoxon p"] = p_value
+
+    return results
+```
+
+### Building the single model table rows
+```{python}
+SINGLE_COMPARISONS = [
+    ("Single_city - CTP_city", "S_city - C_city"),
+    ("Single_comb - CTP_comb", "S_comb - C_comb")
+]
+
+def get_city_rows_single_model(dictionaries, ctp_city_model, single_city_model):
+    rows = []
+    for feature, label in FEATURES:
+        for above, group in [(True, "Above"), (False, "Below")]:
+            results = run_experiment_1_single_model(
+                dictionaries,
+                ctp_city_model,
+                ctp_model_pooled,
+                single_city_model,
+                single_model_pooled,
+                feature,
+                75,
+                above = above
+            )
+            row = {"Feature": label, "Group": group}
+            for key, column in SINGLE_COMPARISONS:
+                row[column] = format_cell(
+                    results[key + " - delta subgroup"],
+                    results[key + " - gain"],
+                    results[key + " - wilcoxon p"]
+                )
+            rows.append(row)
+    return rows
+
+SINGLE_CITY_TABLE_COLUMNS = ["Feature", "Group"] + [column for key, column in SINGLE_COMPARISONS]
+```
+
+### Monterrey single model table
+```{python}
+monterrey_single_rows = get_city_rows_single_model(data_monterrey, ctp_model_monterrey, single_model_monterrey)
+
+dataframe_dictionary = {column: [x[column] for x in monterrey_single_rows] for column in SINGLE_CITY_TABLE_COLUMNS}
+dataframe_monterrey_single = pd.DataFrame(data = dataframe_dictionary)
+dataframe_monterrey_single
+```
+
+### Boston single model table
+```{python}
+boston_single_rows = get_city_rows_single_model(data_boston, ctp_model_boston, single_model_boston)
+
+dataframe_dictionary = {column: [x[column] for x in boston_single_rows] for column in SINGLE_CITY_TABLE_COLUMNS}
+dataframe_boston_single = pd.DataFrame(data = dataframe_dictionary)
+dataframe_boston_single
+```
+
+### San Francisco single model table
+```{python}
+san_francisco_single_rows = get_city_rows_single_model(data_sanfrancisco, ctp_model_san_francisco, single_model_san_francisco)
+
+dataframe_dictionary = {column: [x[column] for x in san_francisco_single_rows] for column in SINGLE_CITY_TABLE_COLUMNS}
+dataframe_san_francisco_single = pd.DataFrame(data = dataframe_dictionary)
+dataframe_san_francisco_single
 ```
