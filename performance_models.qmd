@@ -279,3 +279,45 @@ scaling = dataframe[dataframe["Validation city"] != "All cities"].pivot(
 )
 scaling
 ```
+
+### Differences against the CTP
+(only $RMSE$, computed before rounding)
+```{python}
+rmse_ctp = {(x["Validation City"], x["Training"]): x["RMSE"] for x in all_dictionaries if x["Model Family"] == "CTP"}
+other_dictionaries = [x for x in all_dictionaries if x["Model Family"] != "CTP"]
+
+differences_dictionary = {
+    "Validation city": [x["Validation City"] for x in other_dictionaries],
+    "Training": [x["Training"] for x in other_dictionaries],
+    "Model family": [x["Model Family"] for x in other_dictionaries],
+    "RMSE - RMSE CTP": [round(x["RMSE"] - rmse_ctp[(x["Validation City"], x["Training"])], 3) for x in other_dictionaries]
+}
+
+differences = pd.DataFrame(data = differences_dictionary).pivot(
+    index = "Model family",
+    columns = ["Validation city", "Training"],
+    values = "RMSE - RMSE CTP"
+)
+differences
+```
+
+### Differences between city and combined training
+(only $RMSE$, computed before rounding)
+```{python}
+rmse_combined = {(x["Validation City"], x["Model Family"]): x["RMSE"] for x in all_dictionaries if x["Training"] == "Combined"}
+city_dictionaries = [x for x in all_dictionaries if x["Training"] == "City"]
+
+training_differences_dictionary = {
+    "Validation city": [x["Validation City"] for x in city_dictionaries],
+    "Model family": [x["Model Family"] for x in city_dictionaries],
+    "RMSE city - RMSE combined": [round(x["RMSE"] - rmse_combined[(x["Validation City"], x["Model Family"])], 3) for x in city_dictionaries]
+}
+
+training_differences = pd.DataFrame(data = training_differences_dictionary).pivot(
+    index = "Model family",
+    columns = "Validation city",
+    values = "RMSE city - RMSE combined"
+)
+training_differences = training_differences[["Monterrey", "Boston", "San Francisco"]]
+training_differences
+```
